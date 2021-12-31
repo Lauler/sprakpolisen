@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.env
+*.Rproj
+*.log
+/data
+__pycache__/
