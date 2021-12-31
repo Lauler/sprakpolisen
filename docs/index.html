@@ -88,27 +88,28 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_meta_tags-->
   <title>SpråkpolisenBot: SpråkpolisenBot 👮</title>
 
-  <meta property="description" itemprop="description" content="Welcome to the website. I hope you enjoy it!"/>
+  <meta property="description" itemprop="description" content="SpråkpolisenBot analyserar kommentarer på /r/sweden och upptäcker automatiskt&#10;felaktig användning av `de` och `dem`. Botten bygger i grunden på en maskininlärningsmodell&#10;som tränats upp att kunna skilja på `de` och `dem`."/>
 
 
 
   <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
   <meta property="og:title" content="SpråkpolisenBot: SpråkpolisenBot 👮"/>
   <meta property="og:type" content="article"/>
-  <meta property="og:description" content="Welcome to the website. I hope you enjoy it!"/>
+  <meta property="og:description" content="SpråkpolisenBot analyserar kommentarer på /r/sweden och upptäcker automatiskt&#10;felaktig användning av `de` och `dem`. Botten bygger i grunden på en maskininlärningsmodell&#10;som tränats upp att kunna skilja på `de` och `dem`."/>
   <meta property="og:locale" content="en_US"/>
   <meta property="og:site_name" content="SpråkpolisenBot"/>
 
   <!--  https://dev.twitter.com/cards/types/summary -->
   <meta property="twitter:card" content="summary"/>
   <meta property="twitter:title" content="SpråkpolisenBot: SpråkpolisenBot 👮"/>
-  <meta property="twitter:description" content="Welcome to the website. I hope you enjoy it!"/>
+  <meta property="twitter:description" content="SpråkpolisenBot analyserar kommentarer på /r/sweden och upptäcker automatiskt&#10;felaktig användning av `de` och `dem`. Botten bygger i grunden på en maskininlärningsmodell&#10;som tränats upp att kunna skilja på `de` och `dem`."/>
 
   <!--/radix_placeholder_meta_tags-->
+  
   <!--radix_placeholder_rmarkdown_metadata-->
 
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","site"]}},"value":[{"type":"character","attributes":{},"value":["SpråkpolisenBot 👮"]},{"type":"character","attributes":{},"value":["Welcome to the website. I hope you enjoy it!\n"]},{"type":"character","attributes":{},"value":["distill::distill_website"]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","bibliography"]}},"value":[{"type":"character","attributes":{},"value":["SpråkpolisenBot 👮"]},{"type":"character","attributes":{},"value":["SpråkpolisenBot analyserar kommentarer på /r/sweden och upptäcker automatiskt\nfelaktig användning av `de` och `dem`. Botten bygger i grunden på en maskininlärningsmodell\nsom tränats upp att kunna skilja på `de` och `dem`.\n"]},{"type":"character","attributes":{},"value":["references.bib"]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
   <!--radix_placeholder_navigation_in_header-->
@@ -2053,7 +2054,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"SpråkpolisenBot 👮","description":"Welcome to the website. I hope you enjoy it!","authors":[]}
+{"title":"SpråkpolisenBot 👮","description":"SpråkpolisenBot analyserar kommentarer på /r/sweden och upptäcker automatiskt\nfelaktig användning av `de` och `dem`. Botten bygger i grunden på en maskininlärningsmodell\nsom tränats upp att kunna skilja på `de` och `dem`.","authors":[]}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -2064,8 +2065,10 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <a href="index.html" class="title">SpråkpolisenBot</a>
 </div>
 <div class="nav-right">
-<a href="about.html">Om SpråkpolisenBot</a>
+<a href="index.html">Om SpråkpolisenBot</a>
+<a href="guide.html">Guide</a>
 <a href="faq.html">Vanliga frågor</a>
+<a href="contact.html">Kontakt</a>
 <a href="demo.html">Interaktivt demo</a>
 <a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
 </div>
@@ -2079,16 +2082,161 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <h1>SpråkpolisenBot 👮</h1>
 <!--radix_placeholder_categories-->
 <!--/radix_placeholder_categories-->
-<p><p>Welcome to the website. I hope you enjoy it!</p></p>
+<p><p>SpråkpolisenBot analyserar kommentarer på /r/sweden och upptäcker automatiskt felaktig användning av <code>de</code> och <code>dem</code>. Botten bygger i grunden på en maskininlärningsmodell som tränats upp att kunna skilja på <code>de</code> och <code>dem</code>.</p></p>
 </div>
 
 
 <div class="d-article">
+<h2 id="hjärnan-bakom">Hjärnan bakom 🚨</h2>
+<p>SpråkpolisenBot är baserad på en typ av neurala nätverk som kallas “Transformers” <span class="citation" data-cites="bert">(<a href="#ref-bert" role="doc-biblioref">Devlin et al. 2018</a>)</span>. Sådana modeller grundtränas på stora mängder text för att uppnå en “generell språkförståelse.” Under grundträningen matas modellerna med texter där vissa ord har maskerats, och får till uppgift att prediktera vilka ord som ligger bakom “maskerna.” De utmanas även att prediktera huruvida en textsekvens följer direkt efter en annan (next sentence prediction). Dessa grundtränade modeller kan sedan finjusteras till att lösa specifika uppgifter (exempelvis klassificera dokument till kategorier, automatiskt besvara frågor, m.m.)</p>
+<p>Kungliga biblioteket har tränat en sådan språkförståelsemodell på cirka 20GB svensk text <a href="https://arxiv.org/abs/2007.01658">KB-BERT</a> <span class="citation" data-cites="swedish-bert">(<a href="#ref-swedish-bert" role="doc-biblioref">Malmsten, Börjeson, and Haffenden 2020</a>)</span>. Vi använde denna som grund och fäste ett specialiserat huvud på basen med syftet att klassificera varje ord i en textsekvens till en av tre kategorier:</p>
+<ol type="1">
+<li><strong><code>ord</code></strong> (alla bakgrundsord som inte är de/dem tillhör denna kategori)</li>
+<li><strong><code>DE</code></strong></li>
+<li><strong><code>DEM</code></strong></li>
+</ol>
+<p>Vi kallar vår finjusterade modell <strong>DeFormer</strong>. Den kan laddas ned och användas från <a href="https://huggingface.co/Lauler/deformer">följande länk</a>. Källkoden för att själv kunna träna <strong>DeFormer</strong> finns <a href="https://github.com/Lauler/deformer">här</a>.</p>
+<h2 id="data">Data 🚓</h2>
+<p>DeFormer har tränats på meningar från Europarlamentet, svenskspråkiga Wikimedia samt JRC-acquis (lagtexter från EU). Dessa hämtades från <a href="https://opus.nlpl.eu/">OPUS</a>. Källorna valdes ut för att de antogs ha ett korrekt språkbruk.</p>
+<p>Endast meningar innehållandes <code>de</code> eller <code>dem</code> – eller bägge – behölls i konstruktionen av träningsdataset. I tabellen nedan återfinns beskrivande statistik över antalet meningar som behölls från respektive dataset, samt frekvenser över förekomsten av <code>de/dem</code>.</p>
+<table border="1">
+<thead>
+<tr>
+<th>
+Datakälla
+</th>
+<th>
+Meningar
+</th>
+<th>
+# de
+</th>
+<th>
+# dem
+</th>
+<th>
+de/dem ratio
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://opus.nlpl.eu/download.php?f=Europarl/v8/mono/sv.txt.gz" rel="nofollow">Europaparl sv.txt.gz</a>
+</td>
+<td>
+500660
+</td>
+<td>
+465977
+</td>
+<td>
+54331
+</td>
+<td>
+8.57x
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://opus.nlpl.eu/download.php?f=JRC-Acquis/mono/JRC-Acquis.raw.sv.gz" rel="nofollow">JRC-Acquis raw.sv.gz</a>
+</td>
+<td>
+417951
+</td>
+<td>
+408576
+</td>
+<td>
+17028
+</td>
+<td>
+23.99x
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://opus.nlpl.eu/download.php?f=wikimedia/v20210402/mono/sv.txt.gz" rel="nofollow">Wikimedia sv.txt.gz</a>
+</td>
+<td>
+630601
+</td>
+<td>
+602393
+</td>
+<td>
+38852
+</td>
+<td>
+15.48x
+</td>
+</tr>
+<tr>
+<td>
+<strong>Total</strong>
+</td>
+<td>
+<strong>1549212</strong>
+</td>
+<td>
+<strong>1476946</strong>
+</td>
+<td>
+<strong>110211</strong>
+</td>
+<td>
+<strong>13.40x</strong>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Vid träningen av DeFormer introducerades slumpmässiga substitioner, där <code>de</code> eller <code>dem</code> byttes ut mot den motsatta formen. Modellen utmanades sedan att klassificera vilka <code>de/dem</code> som var korrekta i en given meningen, samt vilka som tillhörde de förvanskade substituerade formen.</p>
+<h2 id="hur-väl-presterar-deformer">Hur väl presterar DeFormer?</h2>
+<p>DeFormer utvärderades på ett separat valideringsset bestående av 31200 meningar från samma datakällor som modellen tränats på (svenska wiki + europaparlamentet + JRC). Slumpmässiga fel (substitutioner) introducerades återigen för att utmana modellen. Tabellen nedan visar att DeFormer är väldigt träffsäker. De få “felaktiga” prediktioner modellen genererar är nästan samtliga av formen de/dem som-konstruktioner med bisatser. Majoriteten av dessa är egentligen inte att anse som felaktiga, eftersom <a href="https://www4.isof.se/cgi-bin/srfl/visasvar.py?sok=dem%20som&amp;svar=79718&amp;log_id=705355">båda formerna är accepterade</a>.</p>
+<table boder="1">
+<thead>
+<tr>
+<th>
+</th>
+<th>
+Accuracy
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+de
+</td>
+<td>
+99.9%
+</td>
+</tr>
+<tr>
+<td>
+dem
+</td>
+<td>
+98.6%
+</td>
+</tr>
+</tbody>
+</table>
+<p>Träffsäkerheten är alltså därmed något högre än de redovisade siffrorna i tabellen. Det går dessvärre inte att säkert uttala sig kring om modellen presterar lika väl på reddit-kommentarer som den gör på lag- och parlamentstexter.</p>
+<h2 id="källkod">Källkod</h2>
+<p>Koden för SpråkpolisenBot kan hittas <a href="https://github.com/Lauler/sprakpolisen">här</a>. Kod för den bakomliggande modellen <strong>DeFormer</strong> finns på följande <a href="https://github.com/Lauler/deformer">länk</a>.</p>
 <div class="layout-chunk" data-layout="l-body">
-<p>👮</p>
+<p>🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓🚓</p>
 </div>
-<h1 id="section">👮</h1>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-bert" class="csl-entry" role="doc-biblioentry">
+Devlin, Jacob, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2018. <span>“<span>BERT:</span> Pre-Training of Deep Bidirectional Transformers for Language Understanding.”</span> <em>CoRR</em> abs/1810.04805. <a href="http://arxiv.org/abs/1810.04805">http://arxiv.org/abs/1810.04805</a>.
+</div>
+<div id="ref-swedish-bert" class="csl-entry" role="doc-biblioentry">
+Malmsten, Martin, Love Börjeson, and Chris Haffenden. 2020. <span>“Playing with Words at the National Library of Sweden – Making a Swedish BERT.”</span> <a href="http://arxiv.org/abs/2007.01658">http://arxiv.org/abs/2007.01658</a>.
+</div>
+</div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
@@ -2101,6 +2249,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--/radix_placeholder_site_after_body-->
 <!--radix_placeholder_appendices-->
 <div class="appendix-bottom">
+<h3 id="references">References</h3>
+<div id="references-listing"></div>
 <h3 id="updates-and-corrections">Corrections</h3>
 <p>If you see mistakes or want to suggest changes, please <a href="https://github.com/Lauler/sprakpolisen/issues/new">create an issue</a> on the source repository.</p>
 </div>

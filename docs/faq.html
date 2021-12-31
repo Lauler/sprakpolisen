@@ -108,7 +108,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description"]}},"value":[{"type":"character","attributes":{},"value":["Vanliga frågor"]},{"type":"character","attributes":{},"value":["Information om SpråkpolisenBot."]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","output"]}},"value":[{"type":"character","attributes":{},"value":["Vanliga frågor"]},{"type":"character","attributes":{},"value":["Information om SpråkpolisenBot.\n"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","toc","toc_depth"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]},{"type":"integer","attributes":{},"value":[3]}]}]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
   <!--radix_placeholder_navigation_in_header-->
@@ -2064,8 +2064,10 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <a href="index.html" class="title">SpråkpolisenBot</a>
 </div>
 <div class="nav-right">
-<a href="about.html">Om SpråkpolisenBot</a>
+<a href="index.html">Om SpråkpolisenBot</a>
+<a href="guide.html">Guide</a>
 <a href="faq.html">Vanliga frågor</a>
+<a href="contact.html">Kontakt</a>
 <a href="demo.html">Interaktivt demo</a>
 <a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
 </div>
@@ -2084,6 +2086,19 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 
 <div class="d-article">
+<div class="d-contents d-contents-float">
+<nav class="l-text toc figcaption" id="TOC">
+<h3>Contents</h3>
+<ul>
+<li><a href="#kan-språkpolisenbot-göra-något-mer-utöver-att-skilja-på-de-och-dem">Kan SpråkpolisenBot göra något mer utöver att skilja på <code>de</code> och <code>dem</code>?</a></li>
+<li><a href="#kan-jag-kalla-språkpolisenbot-till-att-analysera-en-specifik-kommentar">Kan jag kalla SpråkpolisenBot till att analysera en specifik kommentar?</a></li>
+</ul>
+</nav>
+</div>
+<h3 id="kan-språkpolisenbot-göra-något-mer-utöver-att-skilja-på-de-och-dem">Kan SpråkpolisenBot göra något mer utöver att skilja på <code>de</code> och <code>dem</code>?</h3>
+<p>För närvarande är svaret <strong>nej</strong>. Vi överväger främst klassificering av särskrivningar som ett möjligt nästa steg. Detta kommer dock vara en större utmaning än <code>de/dem</code>, då vi först måste veta var alla sammansättningar finns i en text för att kunna träna en sådan modell.</p>
+<h3 id="kan-jag-kalla-språkpolisenbot-till-att-analysera-en-specifik-kommentar">Kan jag kalla SpråkpolisenBot till att analysera en specifik kommentar?</h3>
+<p>Inte just nu. Botten måste förhålla sig till vissa regler och begränsningar kring hur ofta den får skriva inlägg på subredditen. Det hade varit svårt att respektera begränsningarna om botten behövde svara på användarkommandon. Om botten blir väl mottagen på /r/sweden finns dock en chans att sådan funktionalitet så småningom implementeras. Vi vill gärna även tillhandahålla kommandon för att analysera en användares hela kommentarshistorik på /r/sweden.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
