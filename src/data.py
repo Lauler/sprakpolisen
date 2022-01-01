@@ -240,7 +240,7 @@ def filter_comments(df):
         lambda x: count_incorrect(x, word="dem")
     )
     df_comment["author"] = df_comment["author"].apply(lambda x: x.name if x is not None else None)
-    df_comment = df_comment[df_comment["author"] != "SpråkpolisenBot"]  # Filter out bot's comments
+    df_comment = df_comment[df_comment["author"] != "SprakpolisenBot"]  # Filter out bot's comments
     df_comment["subreddit"] = df_comment["subreddit"].apply(
         lambda x: x.display_name if x is not None else None
     )
