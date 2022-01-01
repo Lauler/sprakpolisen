@@ -80,7 +80,7 @@ def wrongful_de_dem(df_post):
 
 def create_analysis_legend():
     message = (
-        f"~~ord~~: Överstruket ord indikerar felaktiv användning av ~~de~~ eller ~~dem~~`.  \n"
+        f"~~ord~~: Överstruket ord indikerar felaktig användning av ~~de~~ eller ~~dem~~`.  \n"
         f"**ord**: Fetstilt **de/dem** är SpråkpolisenBots förslag till korrigering.  \n"
         f"**(##.##%)**: Siffror inom parentes indikerar hur pass säker modellen är på sin prediktion."
     )
@@ -138,12 +138,13 @@ def create_guide(df_post):
 
 
 def create_footer():
+    # &nbsp; is space character, needed for compatibility with old reddit.
     message = (
-        f"^([Om SpråkpolisenBot](https://lauler.github.io/sprakpolisen)) | "
-        f"^([Källkod](https://github.com/Lauler/sprakpolisen)) | "
-        f"^([Vanliga frågor](https://lauler.github.io/sprakpolisen/faq.html)) | "
-        f"^([Feedback](https://lauler.github.io/sprakpolisen/contact.html)) | "
-        f"^([Interaktivt demo](https://lauler.github.io/sprakpolisen/demo.html)) "
+        f"^[Om&nbsp;SpråkpolisenBot](https://lauler.github.io/sprakpolisen) | "
+        f"^[Källkod](https://github.com/Lauler/sprakpolisen) | "
+        f"^[Vanliga&nbsp;frågor](https://lauler.github.io/sprakpolisen/faq.html) | "
+        f"^[Feedback](https://lauler.github.io/sprakpolisen/contact.html) | "
+        f"^[Interaktivt&nbsp;demo](https://lauler.github.io/sprakpolisen/demo.html) "
     )
 
     return message

@@ -40,7 +40,7 @@ def choose_post(df_all, min_hour, max_hour):
         raise e
 
     if any(df_all["nr_mistakes"] > 1):
-        df_multimistake = df_all[df_all["nr_mistakes"] > 1]
+        df_multimistake = df_all[df_all["nr_mistakes"] > 1].reset_index(drop=True)
 
         if len(df_multimistake) > 1:
             max_mistake_idx = df_multimistake["nr_mistakes"].idxmax()
@@ -67,7 +67,9 @@ def match_case(sentence, entity):
     elif word.isupper():
         correct_word = correct_word.lower()
     elif word[0].isupper():
-        correct_word[0] = correct_word[0].upper()
+        word_list = list(correct_word)
+        word_list[0] = correct_word[0].upper()
+        correct_word = "".join(word_list)
 
     # We ignore handling "dE, dEM, deM, dEM", and in such cases just return lower cased version
     return word, correct_word
@@ -134,3 +136,4 @@ def create_reply_msg(df_post):
     message += create_footer()
 
     return message
+

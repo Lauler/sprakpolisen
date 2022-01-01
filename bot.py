@@ -51,7 +51,7 @@ reddit = praw.Reddit(
 
 api = PushshiftAPI(reddit)
 
-df = download_comments(api, weeks=0, hours=12, minutes=0)
+df = download_comments(api, weeks=0, hours=2, minutes=10)
 df = preprocess_comments(df)  # Sentence splitting, and more
 pipe = pipeline("ner", model=model, tokenizer=tokenizer, device=0)
 df = predict_comments(df, pipe, threshold=0.98)  # Only saves preds above threshold
@@ -71,7 +71,6 @@ save_feather(df_sub, type="submission", date=date)
 df_all = merge_comment_submission(df_comment=df_comment, df_sub=df_sub)
 df_post = choose_post(df_all, min_hour=1, max_hour=15)  # Choose which comment to post reply to
 reply_msg = create_reply_msg(df_post)
-
 save_feather(df_all, type="all", date=date)
 
 
