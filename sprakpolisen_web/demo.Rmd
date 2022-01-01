@@ -19,7 +19,7 @@ Det finns 3 kategorier som modellen predikterar: `ord`, `DE` och `DEM`. Alla ord
 
 Instruktioner:
 
-1. Använd endast gemener (små bokstäver) för de/Dem. För andra ord är det okej att använda versaler.
+1. Använd endast gemener (små bokstäver) för de/dem. För andra ord är det okej att använda versaler.
 2. Avsluta meningen med skiljetecken.
 
 Modellen är generellt stark och presterar bra i de allra flesta fall, men har ibland problem när en mening verkligen börjar på "`dem`". Eftersom det är relativt sällsynt och inte förekommer ofta har **DeFormer**-modellen förmodligen inte sett trillräckligt många exempel på korrekta meningar som börjar på `dem`.

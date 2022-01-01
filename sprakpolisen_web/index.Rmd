@@ -34,7 +34,7 @@ Vi kallar vår finjusterade modell **DeFormer**. Den kan laddas ned och använda
 
 ## Data `r knitr::asis_output("\U1F693")`
 
-DeFormer har tränats på meningar från Europarlamentet, svenskspråkiga Wikimedia samt JRC-acquis (lagtexter från EU). Dessa hämtades från [OPUS](https://opus.nlpl.eu/). Källorna valdes ut för att de antogs ha ett korrekt språkbruk. 
+DeFormer har tränats på meningar från Europaparlamentet, svenskspråkiga Wikimedia samt JRC-acquis (lagtexter från EU). Dessa hämtades från [OPUS](https://opus.nlpl.eu/). Källorna valdes ut för att de antogs ha ett korrekt språkbruk. 
 
 Endast meningar innehållandes `de` eller `dem` -- eller bägge -- behölls i konstruktionen av träningsdataset. I tabellen nedan återfinns beskrivande statistik över antalet meningar som behölls från respektive dataset, samt frekvenser över förekomsten av `de/dem`. 
 
@@ -78,7 +78,7 @@ Endast meningar innehållandes `de` eller `dem` -- eller bägge -- behölls i ko
 </tbody>
 </table>
 
-Vid träningen av DeFormer introducerades slumpmässiga substitioner, där `de` eller `dem` byttes ut mot den motsatta formen. Modellen utmanades sedan att klassificera vilka `de/dem` som var korrekta i en given meningen, samt vilka som tillhörde de förvanskade substituerade formen.
+Vid träningen av DeFormer introducerades slumpmässiga substitioner, där `de` eller `dem` byttes ut mot den motsatta formen. Modellen utmanades sedan att klassificera vilka `de/dem` som var korrekta i en given meningen, samt vilka som tillhörde den förvanskade substituerade formen.
 
 ## Hur väl presterar DeFormer?
 

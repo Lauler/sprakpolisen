@@ -2103,7 +2103,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </ol>
 <p>Vi kallar vår finjusterade modell <strong>DeFormer</strong>. Den kan laddas ned och användas från <a href="https://huggingface.co/Lauler/deformer">följande länk</a>. Källkoden för att själv kunna träna <strong>DeFormer</strong> finns <a href="https://github.com/Lauler/deformer">här</a>.</p>
 <h2 id="data">Data 🚓</h2>
-<p>DeFormer har tränats på meningar från Europarlamentet, svenskspråkiga Wikimedia samt JRC-acquis (lagtexter från EU). Dessa hämtades från <a href="https://opus.nlpl.eu/">OPUS</a>. Källorna valdes ut för att de antogs ha ett korrekt språkbruk.</p>
+<p>DeFormer har tränats på meningar från Europaparlamentet, svenskspråkiga Wikimedia samt JRC-acquis (lagtexter från EU). Dessa hämtades från <a href="https://opus.nlpl.eu/">OPUS</a>. Källorna valdes ut för att de antogs ha ett korrekt språkbruk.</p>
 <p>Endast meningar innehållandes <code>de</code> eller <code>dem</code> – eller bägge – behölls i konstruktionen av träningsdataset. I tabellen nedan återfinns beskrivande statistik över antalet meningar som behölls från respektive dataset, samt frekvenser över förekomsten av <code>de/dem</code>.</p>
 <table border="1">
 <thead>
@@ -2196,7 +2196,7 @@ de/dem ratio
 </tr>
 </tbody>
 </table>
-<p>Vid träningen av DeFormer introducerades slumpmässiga substitioner, där <code>de</code> eller <code>dem</code> byttes ut mot den motsatta formen. Modellen utmanades sedan att klassificera vilka <code>de/dem</code> som var korrekta i en given meningen, samt vilka som tillhörde de förvanskade substituerade formen.</p>
+<p>Vid träningen av DeFormer introducerades slumpmässiga substitioner, där <code>de</code> eller <code>dem</code> byttes ut mot den motsatta formen. Modellen utmanades sedan att klassificera vilka <code>de/dem</code> som var korrekta i en given meningen, samt vilka som tillhörde den förvanskade substituerade formen.</p>
 <h2 id="hur-väl-presterar-deformer">Hur väl presterar DeFormer?</h2>
 <p>DeFormer utvärderades på ett separat valideringsset bestående av 31200 meningar från samma datakällor som modellen tränats på (svenska wiki + europaparlamentet + JRC). Slumpmässiga fel (substitutioner) introducerades återigen för att utmana modellen. Tabellen nedan visar att DeFormer är väldigt träffsäker. De få “felaktiga” prediktioner modellen genererar är nästan samtliga av formen de/dem som-konstruktioner med bisatser. Majoriteten av dessa är egentligen inte att anse som felaktiga, eftersom <a href="https://www4.isof.se/cgi-bin/srfl/visasvar.py?sok=dem%20som&amp;svar=79718&amp;log_id=705355">båda formerna är accepterade</a>.</p>
 <table boder="1">

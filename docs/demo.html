@@ -2098,7 +2098,7 @@ Figure 1: Lokalisera “Hosted inference API” på sidan för det interaktiva d
 <p>Det finns 3 kategorier som modellen predikterar: <code>ord</code>, <code>DE</code> och <code>DEM</code>. Alla ord som inte är <code>de</code> eller <code>dem</code> ska modellen prediktera som kategorin <code>ord</code>. Alla förekomster av <code>de/dem</code> ska modellen helst prediktera med kategorierna <code>DE</code> eller <code>DEM</code>. Se figurtexten ovan för en beskrivning av hur demot används rent praktiskt.</p>
 <p>Instruktioner:</p>
 <ol type="1">
-<li>Använd endast gemener (små bokstäver) för de/Dem. För andra ord är det okej att använda versaler.</li>
+<li>Använd endast gemener (små bokstäver) för de/dem. För andra ord är det okej att använda versaler.</li>
 <li>Avsluta meningen med skiljetecken.</li>
 </ol>
 <p>Modellen är generellt stark och presterar bra i de allra flesta fall, men har ibland problem när en mening verkligen börjar på “<code>dem</code>”. Eftersom det är relativt sällsynt och inte förekommer ofta har <strong>DeFormer</strong>-modellen förmodligen inte sett trillräckligt många exempel på korrekta meningar som börjar på <code>dem</code>.</p>
