@@ -80,7 +80,7 @@ def wrongful_de_dem(df_post):
 
 def create_analysis_legend():
     message = (
-        f"~~ord~~: Överstruket ord indikerar felaktiv användning av ~~de~~ eller ~~dem~~`.  \n"
+        f"~~ord~~: Överstruket ord indikerar felaktig användning av ~~de~~ eller ~~dem~~`.  \n"
         f"**ord**: Fetstilt **de/dem** är SpråkpolisenBots förslag till korrigering.  \n"
         f"**(##.##%)**: Siffror inom parentes indikerar hur pass säker modellen är på sin prediktion."
     )
