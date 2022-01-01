@@ -1,0 +1,22 @@
+---
+title: "Vanliga frågor"
+description: |
+  Information om SpråkpolisenBot.
+output:
+  distill::distill_article:
+    self_contained: false
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Kan SpråkpolisenBot göra något mer utöver att skilja på `de` och `dem`?
+
+För närvarande är svaret **nej**. Vi överväger främst klassificering av särskrivningar som ett möjligt nästa steg. Detta kommer dock vara en större utmaning än `de/dem`, då vi först måste veta var alla sammansättningar finns i en text för att kunna träna en sådan modell.
+
+### Kan jag kalla SpråkpolisenBot till att analysera en specifik kommentar?
+
+Inte just nu. Botten måste förhålla sig till vissa regler och begränsningar kring hur ofta den får skriva inlägg på subredditen. Det hade varit svårt att respektera begränsningarna om botten behövde svara på användarkommandon.  Om botten blir väl mottagen på /r/sweden finns dock en chans att sådan funktionalitet så småningom implementeras. Vi vill gärna även tillhandahålla kommandon för att analysera en användares hela kommentarshistorik på /r/sweden.

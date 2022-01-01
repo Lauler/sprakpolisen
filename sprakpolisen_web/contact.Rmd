@@ -1,0 +1,16 @@
+---
+title: "Kontakt"
+description: |
+  Skicka synpunker och feedback till SpråkpolisenBot.
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Feedback kan skickas till `SpråkpolisenBot` på två olika sätt:
+
+1. Via mail till [sprakpolisenbot@gmail.com](mailto:sprakpolisenbot@gmail.com).
+2. Genom att svara `SpråkpolisenBot` direkt på reddit med **duktig båt** eller **duktig bot** om botten gjort bra ifrån sig, eller **stygg båt/stygg bot/dum båt/dum bot** om botten begått ett misstag.
+
+De fall där botten varit stygg/dum granskas manuellt.

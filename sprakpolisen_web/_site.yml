@@ -1,0 +1,20 @@
+name: "sprakpolisen_web"
+title: "SpråkpolisenBot"
+description: |
+  Språkpolisen
+output_dir: "docs"
+base_url: https://Lauler.github.io/sprakpolisen
+repository_url: https://github.com/Lauler/sprakpolisen
+navbar:
+  right:
+    - text: "Om SpråkpolisenBot"
+      href: index.html
+    - text: "Guide"
+      href: guide.html
+    - text: "Vanliga frågor"
+      href: faq.html
+    - text: "Kontakt"
+      href: contact.html
+    - text: "Interaktivt demo"
+      href: demo.html
+output: distill::distill_article

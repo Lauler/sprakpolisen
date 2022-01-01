@@ -1,0 +1,112 @@
+---
+title: 'SpråkpolisenBot `r knitr::asis_output("\U1F46E")`'
+description: |
+  SpråkpolisenBot analyserar kommentarer på /r/sweden och upptäcker automatiskt
+  felaktig användning av `de` och `dem`. Botten bygger i grunden på en maskininlärningsmodell
+  som tränats upp att kunna skilja på `de` och `dem`.
+bibliography: references.bib
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+```
+
+Idén för SpråkpolisenBot kom till efter att ha märkt hur ivriga användare på Sweddit generellt var att korrigera andra användares språkbruk. De vanligast påpekade fallen handlade alltid om förväxlingar av **`de`** och **`dem`**, tätt följt av särskrivningar. Även om dessa rättelser visserligen uppröstades friskt, var de inte alltid så konstruktiva upplevelser för den felande användaren, då fokus till större delen låg på att påpeka fel snarare än försöka avhjälpa källan till felen.
+
+Därför har SpråkpolisenBot beslutat att släppa lös en AI-modell på /r/sweden. Modellens syfte är dels fortfarande att rätta förväxlingar av **`de`** och **`dem`**, men att göra det i ett sammanhang där den felande användaren alltid länkas till resurser låter denne lära sig. Detta sker främst genom att
+
+1. i varje kommentar länka till en [guide](https://lauler.github.io/sprakpolisen/guide.html) med praktiska tips.
+2. låta användaren få tillgång till AI-modellen i form av ett [interaktivt demo](https://lauler.github.io/sprakpolisen/demo.html).
+
+## Hjärnan bakom `r knitr::asis_output("\U1F6A8")`
+
+SpråkpolisenBot är baserad på en typ av neurala nätverk som kallas "Transformers" [@bert]. Sådana modeller grundtränas på stora mängder text för att uppnå en "generell språkförståelse". Under grundträningen matas modellerna med texter där vissa ord har maskerats, och får till uppgift att prediktera vilka ord som ligger bakom "maskerna". De utmanas även att prediktera huruvida en textsekvens följer direkt efter en annan (next sentence prediction). Dessa grundtränade modeller kan sedan finjusteras till att lösa specifika uppgifter (exempelvis klassificera dokument till kategorier, automatiskt besvara frågor, m.m.)
+
+Kungliga biblioteket har tränat en sådan språkförståelsemodell på cirka 20GB svensk text [KB-BERT](https://arxiv.org/abs/2007.01658) [@swedish-bert]. Vi använde denna som grund och fäste ett specialiserat huvud på basen med syftet att klassificera varje ord i en textsekvens till en av tre kategorier:
+
+1. **`ord`** (alla bakgrundsord som inte är de/dem tillhör denna kategori) 
+2. **`DE`**
+3. **`DEM`**
+
+Vi kallar vår finjusterade modell **DeFormer**. Den kan laddas ned och användas från [följande länk](https://huggingface.co/Lauler/deformer). Källkoden för att själv kunna träna **DeFormer** finns [här](https://github.com/Lauler/deformer).
+
+## Data `r knitr::asis_output("\U1F693")`
+
+DeFormer har tränats på meningar från Europarlamentet, svenskspråkiga Wikimedia samt JRC-acquis (lagtexter från EU). Dessa hämtades från [OPUS](https://opus.nlpl.eu/). Källorna valdes ut för att de antogs ha ett korrekt språkbruk. 
+
+Endast meningar innehållandes `de` eller `dem` -- eller bägge -- behölls i konstruktionen av träningsdataset. I tabellen nedan återfinns beskrivande statistik över antalet meningar som behölls från respektive dataset, samt frekvenser över förekomsten av `de/dem`. 
+
+
+<table border="1">
+<thead><tr>
+<th>Datakälla</th>
+<th>Meningar</th>
+<th># de</th>
+<th># dem</th>
+<th>de/dem ratio</th>
+</tr>
+</thead><tbody><tr>
+<td><a href="https://opus.nlpl.eu/download.php?f=Europarl/v8/mono/sv.txt.gz" rel="nofollow">Europaparl sv.txt.gz</a></td>
+<td>500660</td>
+<td>465977</td>
+<td>54331</td>
+<td>8.57x</td>
+</tr>
+<tr>
+<td><a href="https://opus.nlpl.eu/download.php?f=JRC-Acquis/mono/JRC-Acquis.raw.sv.gz" rel="nofollow">JRC-Acquis raw.sv.gz</a></td>
+<td>417951</td>
+<td>408576</td>
+<td>17028</td>
+<td>23.99x</td>
+</tr>
+<tr>
+<td><a href="https://opus.nlpl.eu/download.php?f=wikimedia/v20210402/mono/sv.txt.gz" rel="nofollow">Wikimedia sv.txt.gz</a></td>
+<td>630601</td>
+<td>602393</td>
+<td>38852</td>
+<td>15.48x</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>1549212</strong></td>
+<td><strong>1476946</strong></td>
+<td><strong>110211</strong></td>
+<td><strong>13.40x</strong></td>
+</tr>
+</tbody>
+</table>
+
+Vid träningen av DeFormer introducerades slumpmässiga substitioner, där `de` eller `dem` byttes ut mot den motsatta formen. Modellen utmanades sedan att klassificera vilka `de/dem` som var korrekta i en given meningen, samt vilka som tillhörde de förvanskade substituerade formen.
+
+## Hur väl presterar DeFormer?
+
+DeFormer utvärderades på ett separat valideringsset bestående av 31200 meningar från samma datakällor som modellen tränats på (svenska wiki + europaparlamentet + JRC). Slumpmässiga fel (substitutioner) introducerades återigen för att utmana modellen. Tabellen nedan visar att DeFormer är väldigt träffsäker. De få "felaktiga" prediktioner modellen genererar är nästan samtliga av formen de/dem som-konstruktioner med bisatser. Majoriteten av dessa är egentligen inte att anse som felaktiga, eftersom [båda formerna är accepterade](https://www4.isof.se/cgi-bin/srfl/visasvar.py?sok=dem%20som&svar=79718&log_id=705355).
+
+<table boder="1">
+<thead><tr>
+<th></th>
+<th>Accuracy</th>
+</tr>
+</thead><tbody><tr>
+<td>de</td>
+<td>99.9%</td>
+</tr>
+<tr>
+<td>dem</td>
+<td>98.6%</td>
+</tr>
+</tbody>
+</table>
+
+Träffsäkerheten är alltså därmed något högre än de redovisade siffrorna i tabellen. Det går dessvärre inte att säkert uttala sig kring om modellen presterar lika väl på reddit-kommentarer som den gör på lag- och parlamentstexter.
+
+## Källkod
+
+Koden för SpråkpolisenBot kan hittas [här](https://github.com/Lauler/sprakpolisen).
+Kod för den bakomliggande modellen **DeFormer** finns på följande [länk](https://github.com/Lauler/deformer).
+
+```{r}
+knitr::asis_output("\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693\U1F693")
+```
