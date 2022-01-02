@@ -21,9 +21,8 @@ Om du konsekvent använder **`de`** har du fel endast cirka $10\%$ av de tillfä
 
 ## 2. Ersätt 'de' med 'they', och 'dem' med 'them' {#sec2}
 
-I många fall kan man använda engelskan och svenskan till sin fördel och ersätta **`de`**
-och **`dem`** med andra så kallade "personliga pronomen". Vi listar först alla sätt som de båda
-går att ersätta i respektive kolumn:
+I många fall kan man använda engelskan och svenskan till sin fördel och ersätta **`de`** med och **`dem`** med andra så kallade "personliga pronomen". En föreslagen strategi är alltså att översätta meningen till engelska. Om det står **`they`** i den översatta meningen ska det vara **`de`** i svenska, och motsvarande **`dem`** där det står **`them`**.  Vi listar först alla sätt som **`de`** och **`dem`**
+går att ersätta med alternativa personliga pronomen i varsin kolumn nedan:
 
 ```{r, echo=FALSE}
 df = data.frame("Subjektsform" = c("de", "jag", "du", "han", "hon", "vi", "ni", "they"),
@@ -75,7 +74,7 @@ Huruvida **`de/dem`** tillhör huvudsatsen (den första delen) eller bisatsen (d
 
 Numera anses **`de som`** också som ett acceptabelt alternativ.
 
-## Använd 'de' vid substantiv i bestämd form
+## 4. Använd 'de' vid substantiv i bestämd form
 
 Om vi har **`de/dem`** i nära anslutning till ett substantiv i plural och bestämd form, ska det vara **`de`**. Vi återkommer till det tidigare exemplet:
 

@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 Idén för SpråkpolisenBot kom till efter att ha märkt hur ivriga användare på Sweddit generellt var att korrigera andra användares språkbruk. De vanligast påpekade fallen handlade alltid om förväxlingar av **`de`** och **`dem`**, tätt följt av särskrivningar. Även om dessa rättelser visserligen uppröstades friskt, var de inte alltid så konstruktiva upplevelser för den felande användaren, då fokus till större delen låg på att påpeka fel snarare än försöka avhjälpa källan till felen.
 
-Därför har SpråkpolisenBot beslutat att släppa lös en AI-modell på /r/sweden. Modellens syfte är dels fortfarande att rätta förväxlingar av **`de`** och **`dem`**, men att göra det i ett sammanhang där den felande användaren alltid länkas till resurser låter denne lära sig. Detta sker främst genom att
+Därför har SpråkpolisenBot beslutat att släppa lös en AI-modell på /r/sweden. Modellens syfte är dels fortfarande att rätta förväxlingar av **`de`** och **`dem`**, men att göra det i ett sammanhang där den felande användaren alltid länkas till resurser som låter denne lära sig. Detta sker främst genom att
 
 1. i varje kommentar länka till en [guide](https://lauler.github.io/sprakpolisen/guide.html) med praktiska tips.
 2. låta användaren få tillgång till AI-modellen i form av ett [interaktivt demo](https://lauler.github.io/sprakpolisen/demo.html).
