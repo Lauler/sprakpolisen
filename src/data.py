@@ -142,12 +142,26 @@ def filter_de_som(sentences, preds):
         sentence = sentence.lower()
         pred = data[1]
 
-        for entity in pred:
+        for j, entity in reversed(list(enumerate(pred))):
             # expand to include " som" after "de/dem"
             expanded_entity = sentence[entity["start"] : (entity["end"] + 4)]
 
             if expanded_entity == "de som" or expanded_entity == "dem som":
-                preds[i] = []  # We don't want model to predict on "de/dem som"
+                pred.pop(j)  # We don't want model to predict on "de/dem som"
+                preds[i] = pred
+
+    return preds
+
+
+def filter_dom(sentences, preds):
+    for i, data in enumerate(zip(sentences, preds)):
+        pred = data[1]
+
+        for j, entity in reversed(list(enumerate(pred))):
+            if entity["word"].lower() == "dom":
+                print(entity)
+                pred.pop(j)
+                preds[i] = pred
 
     return preds
 
@@ -205,21 +219,25 @@ def predict_comments(df, pipe, threshold=0.98):
     # Keep only high confidence predictions
     df["pred"] = df["pred"].apply(lambda preds: filter_prediction(preds, threshold=threshold))
 
-    # Remove de/dem som
+    # Remove "de/dem som" and "dom"
     if len(df) > 0:
         df["pred"] = df.apply(lambda x: filter_de_som(x.sentences, x.pred), axis=1)
+        df["pred"] = df.apply(lambda x: filter_dom(x.sentences, x.pred), axis=1)
 
     return df
 
 
 def count_incorrect(preds, word):
+
     count = 0
     for pred in preds:
+
         for entity in pred:
             if len(pred) == 0:
                 break
 
-            count += 1 if entity["word"] == word else 0
+            print(entity)
+            count += 1 if entity["word"].lower() == word else 0
 
     return count
 
@@ -324,3 +342,17 @@ def merge_comment_submission(df_comment, df_sub):
     df_all["replied"] = False  # We have not yet replied to any of the posts
 
     return df_all
+
+
+def get_posted_comments(folder="data/posted"):
+    """
+    Retrieve and save posted comments to single file.
+    """
+
+    posted_files = os.listdir(folder)
+    df_gen = (pd.read_feather(os.path.join(folder, file)) for file in posted_files)
+    df = pd.concat(df_gen)
+    df = df.reset_index(drop=True)
+    df.to_feather("data/df_posted.feather")
+
+    return df
