@@ -79,8 +79,9 @@ def correct_sentence(preds, sentences):
     offset = 0
     correct_sens = []
     for pred, sentence in zip(preds, sentences):
+
         if len(pred) == 0:
-            break
+            continue
 
         original_sentence = sentence
 
