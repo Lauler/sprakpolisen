@@ -159,7 +159,6 @@ def filter_dom(sentences, preds):
 
         for j, entity in reversed(list(enumerate(pred))):
             if entity["word"].lower() == "dom":
-                print(entity)
                 pred.pop(j)
                 preds[i] = pred
 
@@ -236,7 +235,6 @@ def count_incorrect(preds, word):
             if len(pred) == 0:
                 break
 
-            print(entity)
             count += 1 if entity["word"].lower() == word else 0
 
     return count
@@ -268,7 +266,7 @@ def filter_comments(df):
 
     logger.info(f"Finished filtering. {len(df_comment)} comments remaining out of {len(df)}.")
 
-    return df_comment
+    return df_comment.reset_index(drop=True)
 
 
 def save_feather(df, type, date):
@@ -285,6 +283,7 @@ def save_feather(df, type, date):
     if type == "comment" or type == "all":
         df["edited"] = df["edited"].astype("int64")
 
+    df = df.reset_index(drop=True)
     df.to_feather(f"data/{type}/{date}_{type}.feather")
 
 

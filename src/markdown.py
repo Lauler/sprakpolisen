@@ -45,13 +45,13 @@ def wrongful_de_dem(df_post):
     dem_nr = df_post["nr_mistakes_dem"].iloc[0]
 
     if de_nr == 0 and dem_nr > 0:
-        wrongful_msg = f"**{dem_nr}** felaktiga användningar av **`dem`**"
+        wrongful_msg = f"**{dem_nr}** felaktiga användningar av `dem`"
     elif de_nr > 0 and dem_nr == 0:
-        wrongful_msg = f"**{de_nr}** felaktiga användningar av **`de`**"
+        wrongful_msg = f"**{de_nr}** felaktiga användningar av `de`"
     elif de_nr > 0 and dem_nr > 0:
         wrongful_msg = (
-            f"**{de_nr}** felaktiga användningar av **`de`** "
-            f"samt **{dem_nr}** felaktiga användningar av **`dem`**"
+            f"**{de_nr}** felaktiga användningar av `de` "
+            f"samt **{dem_nr}** felaktiga användningar av `dem`"
         )
 
     if (
@@ -80,7 +80,7 @@ def wrongful_de_dem(df_post):
 
 def create_analysis_legend():
     message = (
-        f"~~ord~~: Överstruket ord indikerar felaktig användning av ~~de~~ eller ~~dem~~`.  \n"
+        f"~~ord~~: Överstruket ord indikerar felaktig användning av ~~de~~ eller ~~dem~~.  \n"
         f"**ord**: Fetstilt **de/dem** är SpråkpolisenBots förslag till korrigering.  \n"
         f"**(##.##%)**: Siffror inom parentes indikerar hur pass säker modellen är på sin prediktion."
     )
@@ -117,10 +117,8 @@ def create_guide(df_post):
     guide_message = (
         f"En guide med tips och strategier för att skilja mellan `de` och `dem` finnes "
         f"på [Språkpolisens hemsida](https://lauler.github.io/sprakpolisen/guide.html). "
-        f"De tillämpningsmässigt enklaste och minst tidskrävande tipsen har listats först. "
-        f"Ett interaktivt demo där användare själva kan skriva in meningar och få dem "
-        f"rättade finns också tillgänglig. Instruktioner för hur demot kan nås och användas "
-        f"[hittas här](https://lauler.github.io/sprakpolisen/interactive.html)."
+        f"En interaktiv demo där användare själva kan skriva in meningar och få dem "
+        f"rättade [finns här](https://lauler.github.io/sprakpolisen/demo.html)."
     )
 
     if df_post["nr_mistakes_dem"][0] >= 2:
