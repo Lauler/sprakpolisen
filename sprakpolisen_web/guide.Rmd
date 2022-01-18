@@ -15,7 +15,7 @@ I modernt svenskt talspråk uttalas både **`de`** och **`dem`** nästan uteslut
 **`De`** är cirka tio gånger vanligare i svenskt skriftspråk jämfört med **`dem`**. Om du är någon som genomgående och konsekvent (över)använder **`dem`** bör du vara väldigt medveten om att 
 
 1. Felaktig användning av **`dem`** är det som sticker mest i ögonen hos dem som kan skilja mellan **`de`** och **`dem`**. Att genomgående skriva **`dem`** är därmed att göra sig själv en stor otjänst.
-2. Felaktig använding av **`de`** uppfattas indirekt som mindre allvarligt. Eftersom **`de`** förekommer i såpass större utsträckning är sannolikheten högre att du gör rätt av ren slump. I de fall där du ändå råkat göra fel uppfattas det dessutom som mindre allvarligt och ses ett enstaka misstag.
+2. Felaktig använding av **`de`** uppfattas indirekt som mindre allvarligt. Eftersom **`de`** förekommer i såpass större utsträckning är sannolikheten högre att du gör rätt av ren slump. I de fall där du ändå råkat göra fel uppfattas det dessutom som mindre allvarligt och ses som ett enstaka misstag.
 
 Om du konsekvent använder **`de`** har du fel endast cirka $10\%$ av de tillfällen du använder ordet. Är du istället någon som konsekvent använder **`dem`**, kommer det rent statistiskt bli fel mer än $9$ av $10$ gånger. Använd statistiken till din fördel -- gissa **`de`**!
 

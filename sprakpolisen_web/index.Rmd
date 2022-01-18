@@ -18,7 +18,7 @@ Idén för SpråkpolisenBot kom till efter att ha märkt hur ivriga användare p
 Därför har SpråkpolisenBot beslutat att släppa lös en AI-modell på /r/sweden. Modellens syfte är dels fortfarande att rätta förväxlingar av **`de`** och **`dem`**, men att göra det i ett sammanhang där den felande användaren alltid länkas till resurser som låter denne lära sig. Detta sker främst genom att
 
 1. i varje kommentar länka till en [guide](https://lauler.github.io/sprakpolisen/guide.html) med praktiska tips.
-2. låta användaren få tillgång till AI-modellen i form av ett [interaktivt demo](https://lauler.github.io/sprakpolisen/demo.html).
+2. låta användaren få tillgång till AI-modellen i form av en [interaktiv demo](https://lauler.github.io/sprakpolisen/demo.html).
 
 ## Hjärnan bakom `r knitr::asis_output("\U1F6A8")`
 
