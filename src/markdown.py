@@ -106,7 +106,7 @@ def create_header(df_post):
     if df_post["nr_mistakes"][0] >= 3:
         message = (
             f'Stopp {add_emoji("car")}{add_emoji("siren")}! '
-            f'Du har blivit anhållen av /u/SprakpolisenBot {add_emoji("police")} '
+            f'Du har blivit gripen av /u/SprakpolisenBot {add_emoji("police")} '
             f"på sannolika skäl misstänkt för brott mot det svenska skriftspråket."
         )
 
@@ -142,7 +142,7 @@ def create_footer():
         f"^[Källkod](https://github.com/Lauler/sprakpolisen) | "
         f"^[Vanliga&nbsp;frågor](https://lauler.github.io/sprakpolisen/faq.html) | "
         f"^[Feedback](https://lauler.github.io/sprakpolisen/contact.html) | "
-        f"^[Interaktivt&nbsp;demo](https://lauler.github.io/sprakpolisen/demo.html) "
+        f"^[Interaktiv&nbsp;demo](https://lauler.github.io/sprakpolisen/demo.html) "
     )
 
     return message

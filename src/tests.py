@@ -1,4 +1,4 @@
-from .data import filter_de_som_alt, filter_dom
+from .data import filter_de_som, filter_dom
 
 sens = [
     "Jag hatar de som är för sämst för de suger dem",
@@ -19,5 +19,5 @@ preds = [
     ],
 ]
 
-filter_de_som_alt(sens, preds)
+filter_de_som(sens, preds)
 filter_dom(sens, preds)
