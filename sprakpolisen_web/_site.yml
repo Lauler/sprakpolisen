@@ -15,6 +15,6 @@ navbar:
       href: faq.html
     - text: "Kontakt"
       href: contact.html
-    - text: "Interaktivt demo"
+    - text: "Interaktiv demo"
       href: demo.html
 output: distill::distill_article
