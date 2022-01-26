@@ -21,8 +21,7 @@ Om du konsekvent använder **`de`** har du fel endast cirka $10\%$ av de tillfä
 
 ## 2. Ersätt 'de' med 'they', och 'dem' med 'them' {#sec2}
 
-I många fall kan man använda engelskan och svenskan till sin fördel och ersätta **`de`** med och **`dem`** med andra så kallade "personliga pronomen". En föreslagen strategi är alltså att översätta meningen till engelska. Om det står **`they`** i den översatta meningen ska det vara **`de`** i svenska, och motsvarande **`dem`** där det står **`them`**.  Vi listar först alla sätt som **`de`** och **`dem`**
-går att ersätta med alternativa personliga pronomen i varsin kolumn nedan:
+I många fall kan man använda engelskan och svenskan till sin fördel och ersätta **`de`** med och **`dem`** med andra så kallade "personliga pronomen". En föreslagen strategi är alltså att översätta meningen till engelska. Om det står **`they`** i den översatta meningen ska det vara **`de`** i svenska, och motsvarande **`dem`** där det står **`them`**.  Vi listar nedan, i varsin kolumn, några olika sätt som **`de`** respektive **`dem`**  kan ersättas med alternativa personliga pronomen från både svenskan och engelskan:
 
 ```{r, echo=FALSE}
 df = data.frame("Subjektsform" = c("de", "jag", "du", "han", "hon", "vi", "ni", "they"),
@@ -40,12 +39,11 @@ reactable::reactable(df, bordered=TRUE, sortable=FALSE)
 
 > **`Vi`** gick till restaurangen och **`vi`** åt allt **`vi`** såg omkring **`oss`**.
 
-När grammatiknördar ska förklara hur man skiljer på **`de`** och **`dem`** börjar de oftast prata om "subjekt" och "objekt". SpråkpolisenBot tänker inte gå in på det annat än att med hjälp av tabellen notera att de flesta av oss faktiskt intuitivt kan skilja på subjekt- och objektsform när de båda formerna inte uttalas likadant. 
+När grammatiknördar ska förklara hur man skiljer på **`de`** och **`dem`** börjar de oftast prata om "subjekt" och "objekt". SpråkpolisenBot tänker inte gå in på det annat än att med hjälp av tabellen notera att de flesta av oss faktiskt intuitivt kan skilja på subjekt- och objektsform när de båda formerna inte uttalas likadant. Om du är osäker huruvida det ska vara **`de`** eller **`dem`**, testa alltså då att ersätta **`de`** med exempelvis **jag/vi/ni/they**, och motsvarande **`dem`** med **mig/oss/er/them**. 
 
 Ovanstående trick funkar i majoriteten av fallen, men inte alltid. Här är ett fall där det inte riktigt fungerar:
 
 > Jag såg **`dem`** komma runt hörnet och gå i riktning mot **`de`** byggnaderna.
-
 
 > I saw **`them`** come around the corner and walk in the direction of those buildings.
 
@@ -94,3 +92,14 @@ Hade vi kapat av den sista meningen innan "fem gästerna" hade istället följan
 
 Men så fort vi har substantiv (saker som bord, bollar, skärmar) i bestämd form (borden, bollarna, skärmarna) ska det alltid vara **`de`**.
 
+Det svenska **`de`** används i två olika betydelser. Dels i betydelsen **they**, men även i en annan betydelse som motsvarar engelskans **the** eller tyskans **die/der**. I grammatiktermer heter det att **`de`** är en *bestämd artikel* i den andra användningen. Därför ska det *alltid* vara **`de`** om vi i en översättning kan byta ut **`de`** eller **`dem`** med **the**.
+
+Till exempel heter det på svenska alltid: **`de`** flesta, **`de`** andra. Det ska aldrig vara ~~dem~~ i föregående fall. Även vid meningar som
+
+> Jag har sett **`de`** andra. 
+
+> Vi såg **`de`** flesta misslyckas.
+
+> Real Madrid besegrade **`de`** bästa lag**en** i gruppspelet.
+
+Anledningen är just för att **`de`** fungerar som *bestämd artikel* i samtliga ovanstående fall.

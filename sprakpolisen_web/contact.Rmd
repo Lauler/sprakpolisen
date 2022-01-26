@@ -8,7 +8,7 @@ description: |
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Feedback kan skickas till `SpråkpolisenBot` på två olika sätt:
+Feedback kan skickas till `SpråkpolisenBot` på två sätt:
 
 1. Via mail till [sprakpolisenbot@gmail.com](mailto:sprakpolisenbot@gmail.com).
 2. Genom att svara `SpråkpolisenBot` direkt på reddit med **duktig båt** eller **duktig bot** om botten gjort bra ifrån sig, eller **stygg båt/stygg bot/dum båt/dum bot** om botten begått ett misstag.
