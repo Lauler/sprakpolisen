@@ -1,3 +1,6 @@
+import re
+
+
 def add_quotation(sentence):
     return "> " + sentence
 
@@ -121,16 +124,36 @@ def create_guide(df_post):
         f"rättade [finns här](https://lauler.github.io/sprakpolisen/demo.html)."
     )
 
+    message = ""
+
     if df_post["nr_mistakes_dem"][0] >= 2:
-        message = (
+        added_message = (
             f"Visste du att `de` är cirka 10 gånger vanligare än `dem` i svensk text? "
             f"Om du är osäker kring vilket som är rätt är det alltså statistiskt sett säkrast "
             f"att ***alltid gissa på `de`.***"
         )
-        message = add_paragraph(message)
-        message += guide_message
-    else:
-        message = guide_message
+        message += add_paragraph(added_message)
+
+    if df_post["sentences"].apply(
+        lambda sens: any([bool(re.search("[Dd]em flesta", sen)) for sen in sens])
+    )[0]:
+        added_message = (
+            f"Visste du att det aldrig kan heta ~~dem flesta~~ på svenska? **De flesta** "
+            f"är den enda korrekta formen av uttrycket."
+        )
+        message += add_paragraph(added_message)
+
+    if df_post["sentences"].apply(
+        lambda sens: any([bool(re.search("[Dd]em andra", sen)) for sen in sens])
+    )[0]:
+        message = (
+            f"Visste du att det aldrig kan heta ~~dem andra~~ på svenska? **De andra** "
+            f"är den enda korrekta formen av uttrycket. När `de` används i en betydelse "
+            f"som motsvarar engelskans **the**, ska det alltid vara `de`."
+        )
+        message += add_paragraph(message)
+
+    message += guide_message
 
     return message
 

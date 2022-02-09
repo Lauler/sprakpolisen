@@ -110,7 +110,7 @@ def create_reply_msg(df_post):
     message = add_paragraph(message)
 
     # Analys
-    message += insert_heading("Analys av kommentar")
+    # message += insert_heading("Analys av kommentar")
     message = add_paragraph(message)
     message += wrongful_de_dem(df_post)
     message = add_paragraph(message)
@@ -126,7 +126,7 @@ def create_reply_msg(df_post):
     message = add_paragraph(message)
 
     # Guide
-    message += insert_heading("Guide och tips")
+    # message += insert_heading("Guide och tips")
     message = add_paragraph(message)
     message += create_guide(df_post)
     message = add_paragraph(message)

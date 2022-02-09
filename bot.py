@@ -52,7 +52,7 @@ reddit = praw.Reddit(
 
 api = PushshiftAPI(reddit)
 
-df = download_comments(api, weeks=0, hours=2, minutes=45)
+df = download_comments(api, weeks=0, hours=7, minutes=45)
 df = preprocess_comments(df)  # Sentence splitting, and more
 pipe = pipeline("ner", model=model, tokenizer=tokenizer, device=0)
 df = predict_comments(df, pipe, threshold=0.98)  # Only saves preds above threshold
@@ -80,10 +80,23 @@ reply_msg = create_reply_msg(df_post)
 save_feather(df_all, type="all", date=date)
 
 
-# Reply to chosen comment
-logging.info(f'Replying to comment id {df_post["id"][0]}.')
-comment = reddit.comment(df_post["id"][0])
-comment.reply(reply_msg)
+for i in range(len(df_all)):
+    try:
+        # Reply to chosen comment
+        logging.info(f'Replying to comment id {df_post["id"][0]}.')
+        comment = reddit.comment(df_post["id"][0])
+        comment.reply(reply_msg)
+        break
+    except Exception as e:
+        if isinstance(e, praw.exceptions.RedditAPIException):
+            # Due to incredibly stupid changes around how blocked comments work,
+            # SprakpolisenBot may be blocked from replying to anyone in a comment chain
+            # if a single comment author in the comment chain has blocked SprakpolisenBot.
+            logging.error(f'Failed replying to comment id {df_post["id"][0]} because of block.')
+            df_all = df_all[df_all["id"] != df_post["id"][0]]
+            df_post = choose_post(df_all, min_hour=1, max_hour=15)
+            reply_msg = create_reply_msg(df_post)
+
 logging.info("Succesfully replied.")
 
 # Save replies/posted comments
