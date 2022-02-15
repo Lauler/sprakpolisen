@@ -17,4 +17,6 @@ navbar:
       href: contact.html
     - text: "Interaktiv demo"
       href: demo.html
+    - icon: fab fa-github
+      href: https://github.com/Lauler/sprakpolisen
 output: distill::distill_article

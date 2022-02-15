@@ -78,7 +78,7 @@ Endast meningar innehållandes `de` eller `dem` -- eller bägge -- behölls i ko
 </tbody>
 </table>
 
-Vid träningen av DeFormer introducerades slumpmässiga substitioner, där `de` eller `dem` byttes ut mot den motsatta formen. Modellen utmanades sedan att klassificera vilka `de/dem` som var korrekta i en given meningen, samt vilka som tillhörde den förvanskade substituerade formen.
+Vid träningen av DeFormer introducerades slumpmässiga substitioner, där `de` eller `dem` byttes ut mot den motsatta formen. Modellen utmanades sedan att klassificera vilka `de/dem` som var korrekta i en given mening, samt vilka som tillhörde den förvanskade substituerade formen.
 
 ## Hur väl presterar DeFormer?
 
