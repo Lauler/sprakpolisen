@@ -73,19 +73,16 @@ def wrongful_de_dem(df_post):
         wrongful_msg = reverse_replace(wrongful_msg, "felaktiga", "felaktig", 1)
         wrongful_msg = reverse_replace(wrongful_msg, "användningar", "användning", 1)
 
-    message = (
-        f"Efter en analys av inlägget har mitt neurala nätverk upptäckt {wrongful_msg}. "
-        f"SpråkpolisenBot föreslår följande ändringar:"
-    )
+    message = f"Efter en analys har mitt neurala nätverk upptäckt {wrongful_msg}."
 
     return message
 
 
 def create_analysis_legend():
     message = (
-        f"~~ord~~: Överstruket ord indikerar felaktig användning av ~~de~~ eller ~~dem~~.  \n"
-        f"**ord**: Fetstilt **de/dem** är SpråkpolisenBots förslag till korrigering.  \n"
-        f"**(##.##%)**: Siffror inom parentes indikerar hur pass säker modellen är på sin prediktion."
+        # f"~~ord~~: Överstruket ord indikerar felaktig användning av ~~de~~ eller ~~dem~~.  \n"
+        # f"Fetstilt **de/dem** är SpråkpolisenBots förslag till korrigering."
+        # f"**(##.##%)**: Siffror inom parentes indikerar hur pass säker modellen är på sin prediktion."
     )
 
     return message
@@ -93,35 +90,36 @@ def create_analysis_legend():
 
 def create_header(df_post):
 
-    if df_post["nr_mistakes"][0] == 1:
+    if df_post["nr_mistakes"][0] <= 2:
         message = (
-            f'Tjenixen, /u/SprakpolisenBot här {add_emoji("police")}. Jag är en båt som '
-            f"tränats till att kunna skilja mellan korrekt och felaktigt bruk av `de` och `dem` i svensk text. "
-        )
-    if df_post["nr_mistakes"][0] == 2:
-        message = (
-            f'/u/SprakpolisenBot här {add_emoji("police")}{add_emoji("car")}. '
-            f"Vi utför för närvarande slumpmässiga språkkontroller av kommentarer på /r/sweden. "
-            f"Ovanstående inlägg överskred den tillåtna gränsen för felaktiga `de/dem`-användningar. "
-            f"Vi rekommenderar användare som vill undvika att fastna i framtida kontroller att "
-            f"ta del av analysen och guiden som bifogas nedan."
+            f'Tjenixen, SpråkpolisenBot här {add_emoji("police")}. Jag är en bot som '
+            f"kan skilja på `de` och `dem` i svensk text. "
         )
     if df_post["nr_mistakes"][0] >= 3:
         message = (
             f'Stopp {add_emoji("car")}{add_emoji("siren")}! '
-            f'Du har blivit gripen av /u/SprakpolisenBot {add_emoji("police")} '
-            f"på sannolika skäl misstänkt för brott mot det svenska skriftspråket."
+            f'Du har blivit gripen av SpråkpolisenBot {add_emoji("police")} '
+            f"på sannolika skäl misstänkt för brott mot det svenska skriftspråket. "
         )
+
+    # if df_post["nr_mistakes"][0] == 2:
+    #     message = (
+    #         f'SpråkpolisenBot här {add_emoji("police")}{add_emoji("car")}. '
+    #         f"Vi utför för närvarande slumpmässiga språkkontroller av kommentarer på Sweddit. "
+    #         f"Ovanstående inlägg överskred den tillåtna gränsen för felaktiga `de/dem`-användningar. "
+    #         f"Vi rekommenderar användare som vill undvika att fastna i framtida kontroller att "
+    #         f"ta del av analysen och guiden som bifogas nedan."
+    #     )
 
     return message
 
 
 def create_guide(df_post):
     guide_message = (
-        f"En guide med tips och strategier för att skilja mellan `de` och `dem` finnes "
+        f"En guide med tips för att skilja på `de` och `dem` finnes "
         f"på [Språkpolisens hemsida](https://lauler.github.io/sprakpolisen/guide.html). "
-        f"En interaktiv demo där användare själva kan skriva in meningar och få dem "
-        f"rättade [finns här](https://lauler.github.io/sprakpolisen/demo.html)."
+        # f"En interaktiv demo där användare själva kan skriva in meningar och få dem "
+        # f"rättade [finns här](https://lauler.github.io/sprakpolisen/demo.html)."
     )
 
     message = ""
@@ -143,15 +141,54 @@ def create_guide(df_post):
         )
         message += add_paragraph(added_message)
 
+    for word in ["andra", "värsta", "bästa", "sämsta", "första"]:
+        if df_post["sentences"].apply(
+            lambda sens: any([bool(re.search(f"[Dd]em {word}", sen)) for sen in sens])
+        )[0]:
+            added_message = (
+                f"Visste du att det inte kan heta ~~dem {word}~~? **De {word}** "
+                f"är den korrekta formen. När `de` används i en betydelse "
+                f"som motsvarar engelskans **the**, ska det alltid vara `de` på svenska."
+            )
+            message += add_paragraph(added_message)
+
+    message += guide_message
+
+    return message
+
+
+def create_guide_en(df_post):
+    """
+    Guide if English sentences are successfully translated and included in message.
+    """
+
+    guide_message = (
+        f"[Tips](https://lauler.github.io/sprakpolisen/guide.html): Översätt till engelska. "
+        f"Om **them** passar bäst ska det vara `dem` på svenska. "
+        f"Om **they/those/the** eller något annat passar bättre ska det vara `de`."
+    )
+
+    message = ""
+
     if df_post["sentences"].apply(
-        lambda sens: any([bool(re.search("[Dd]em andra", sen)) for sen in sens])
+        lambda sens: any([bool(re.search("[Dd]em flesta", sen)) for sen in sens])
     )[0]:
-        message = (
-            f"Visste du att det aldrig kan heta ~~dem andra~~ på svenska? **De andra** "
-            f"är den enda korrekta formen av uttrycket. När `de` används i en betydelse "
-            f"som motsvarar engelskans **the**, ska det alltid vara `de`."
+        added_message = (
+            f"Visste du att det aldrig kan heta ~~dem flesta~~ på svenska? **De flesta** "
+            f"är den enda korrekta formen av uttrycket."
         )
-        message += add_paragraph(message)
+        message += add_paragraph(added_message)
+
+    for word in ["andra", "värsta", "bästa", "sämsta", "första"]:
+        if df_post["sentences"].apply(
+            lambda sens: any([bool(re.search(f"[Dd]em {word}", sen)) for sen in sens])
+        )[0]:
+            added_message = (
+                f"Visste du att det inte kan heta ~~dem {word}~~? **De {word}** "
+                f"är den korrekta formen. När `de` används i en betydelse "
+                f"som motsvarar engelskans **the**, ska det alltid vara `de` på svenska."
+            )
+            message += add_paragraph(added_message)
 
     message += guide_message
 

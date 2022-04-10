@@ -5,12 +5,14 @@ from .markdown import (
     add_paragraph,
     add_quotation,
     create_analysis_legend,
+    create_guide_en,
     create_footer,
     create_guide,
     create_header,
     insert_heading,
     wrongful_de_dem,
 )
+
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +67,7 @@ def match_case(sentence, entity):
     if word.islower():
         pass  # correct_word was made lower cased before
     elif word.isupper():
-        correct_word = correct_word.lower()
+        correct_word = correct_word.upper()
     elif word[0].isupper():
         word_list = list(correct_word)
         word_list[0] = correct_word[0].upper()
@@ -90,11 +92,13 @@ def correct_sentence(preds, sentences):
             begin_idx = entity["start"] + offset
             end_idx = entity["end"] + offset
             score = f'{entity["score"]:.2%}'  # score as percentage with 2 decimals
-            sentence = f"{sentence[:begin_idx]}~~{original_word}~~ **{correct_word} ({score})**{sentence[end_idx:]}"
+            sentence = (
+                f"{sentence[:begin_idx]}~~{original_word}~~ **{correct_word}**{sentence[end_idx:]}"
+            )
 
             # Count all added text: words, strikethroughs (~~), spaces, parenthesis and bold (**).
             # Keep track of the offset in case of multiple de/dem errors in same sentence.
-            offset += 12 + len(correct_word) + len(score)
+            offset += 9 + len(correct_word)  # + len(score)
 
         correct_sens.append(sentence)
         offset = 0
@@ -102,17 +106,65 @@ def correct_sentence(preds, sentences):
     return correct_sens
 
 
-def create_reply_msg(df_post):
+def correct_sentence_en(preds, correct_sens):
+    """
+    We have correctly translated sentences already, but want to 
+    introduce the wrong form of they/them with a strikethrough
+    next to the already corrected instance of they/them/the/those.
+    """
+
+    offset = 0
+    subtract_pad = -5  # <pad> token length needs to be subtracted from decoder string indices
+    mistake_sens = []
+
+    they_words = ["They", "they", "Those", "those", "The", "the"]  # Can be substituted for 'de'
+    them_words = ["Them", "them"]
+
+    for pred, sentence in zip(preds, correct_sens):
+
+        if len(pred) == 0:
+            continue
+
+        for entity in pred:
+
+            if entity["word"] not in (they_words + them_words):
+                logger.info(
+                    f"Swedish de/dem did not match corresponding English they/them/the/those for"
+                    f"sentence: '{sentence}', and entity: '{entity}'"
+                )
+                sentence = False
+                continue
+
+            begin_idx = entity["start"] + subtract_pad + offset
+            end_idx = entity["end"] + subtract_pad + offset
+
+            if entity["word"] in them_words:
+                wrong_word = "they" if entity["word"][0].islower() else "They"
+            elif entity["word"] in they_words:
+                wrong_word = "them" if entity["word"][0].islower() else "Them"
+
+            sentence = (
+                f"{sentence[:begin_idx]}~~{wrong_word}~~ **{entity['word']}**{sentence[end_idx:]}"
+            )
+
+            # Count all added text: words, strikethroughs (~~), spaces, parenthesis and bold (**).
+            # Keep track of the offset in case of multiple de/dem errors in same sentence.
+            offset += 9 + len(wrong_word)
+
+        mistake_sens.append(sentence)
+        offset = 0
+
+    return mistake_sens
+
+
+def create_reply_msg(df_post, pipe_en):
     # Header
     message = create_header(df_post)
-    message = add_paragraph(message)
-    message = add_horizontal_rule(message)
-    message = add_paragraph(message)
 
     # Analys
     # message += insert_heading("Analys av kommentar")
-    message = add_paragraph(message)
-    message += wrongful_de_dem(df_post)
+    # message = add_paragraph(message)
+    # message += wrongful_de_dem(df_post)
     message = add_paragraph(message)
     correct_sens = correct_sentence(df_post["pred"][0], df_post["sentences"][0])
 
@@ -120,21 +172,25 @@ def create_reply_msg(df_post):
         message += add_quotation(sentence)
         message = add_paragraph(message)
 
-    message += create_analysis_legend()
-    message = add_paragraph(message)
+    # message += create_analysis_legend()
+    # message = add_paragraph(message)
     message = add_horizontal_rule(message)
     message = add_paragraph(message)
 
-    # Guide
-    # message += insert_heading("Guide och tips")
-    message = add_paragraph(message)
-    message += create_guide(df_post)
-    message = add_paragraph(message)
+    correct_sens_en = correct_sentence_en(
+        preds=pipe_en["pred_pipe"], correct_sens=pipe_en["corrected_sentences"]
+    )
 
-    # Footer
-    message = add_horizontal_rule(message)
-    message = add_paragraph(message)
-    message += create_footer()
+    if all(correct_sens_en):
+        # If all Swedish de/dem were matched against suitable English equivalent
+        message += create_guide_en(df_post)
+
+        for sentence in correct_sens_en:
+            message = add_paragraph(message)
+            message += add_quotation(sentence)
+    else:
+        # Guide
+        message += create_guide(df_post)
 
     return message
 

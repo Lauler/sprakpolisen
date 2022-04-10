@@ -6,7 +6,12 @@ import pprint
 import logging
 import praw
 from psaw import PushshiftAPI
-from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
+from transformers import (
+    AutoTokenizer,
+    AutoModelForTokenClassification,
+    AutoModelForSeq2SeqLM,
+    pipeline,
+)
 from src.comment import choose_post, create_reply_msg
 from src.data import (
     download_comments,
@@ -18,6 +23,7 @@ from src.data import (
     preprocess_comments,
     save_feather,
 )
+from src.translate import translation_preprocess
 from dotenv import load_dotenv
 
 logging.basicConfig(
@@ -29,19 +35,27 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-# Load model
+#### Load models
 tokenizer = AutoTokenizer.from_pretrained("Lauler/deformer", model_max_length=250)
 model = AutoModelForTokenClassification.from_pretrained("Lauler/deformer")
 model.to(device)
 
-# Load env variables
+# Machine Translation model
+tokenizer_translate = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-sv-en")
+model_translate = AutoModelForSeq2SeqLM.from_pretrained(
+    "Helsinki-NLP/opus-mt-sv-en", output_attentions=True
+)
+model_translate.eval()
+model_translate.to(device)
+
+#### Load env variables
 load_dotenv()
 username = os.getenv("USR")
 pw = os.getenv("PW")
 client_id = os.getenv("CLIENT_ID")
 client_secret = os.getenv("CLIENT_SECRET")
 
-# API
+#### API
 reddit = praw.Reddit(
     client_id=client_id,
     client_secret=client_secret,
@@ -52,7 +66,7 @@ reddit = praw.Reddit(
 
 api = PushshiftAPI(reddit)
 
-df = download_comments(api, weeks=0, hours=7, minutes=45)
+df = download_comments(api, weeks=0, hours=2, minutes=45)
 df = preprocess_comments(df)  # Sentence splitting, and more
 pipe = pipeline("ner", model=model, tokenizer=tokenizer, device=0)
 df = predict_comments(df, pipe, threshold=0.98)  # Only saves preds above threshold
@@ -76,7 +90,16 @@ df_all = df_all[~df_all["link_id"].isin(df_history["link_id"])].reset_index(drop
 
 # Choose which comment to post reply to
 df_post = choose_post(df_all, min_hour=1, max_hour=15)
-reply_msg = create_reply_msg(df_post)
+
+#### Translate to English
+pipes = translation_preprocess(
+    df_post,
+    model_translate=model_translate,
+    tokenizer_translate=tokenizer_translate,
+    device=device,
+)
+
+reply_msg = create_reply_msg(df_post, pipe_en=pipes[1])
 save_feather(df_all, type="all", date=date)
 
 
@@ -100,6 +123,5 @@ for i in range(len(df_all)):
 logging.info("Succesfully replied.")
 
 # Save replies/posted comments
-
 df_post["replied"] = True
 save_feather(df_post, type="posted", date=date)
