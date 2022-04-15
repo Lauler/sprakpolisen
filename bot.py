@@ -66,7 +66,7 @@ reddit = praw.Reddit(
 
 api = PushshiftAPI(reddit)
 
-df = download_comments(api, weeks=0, hours=2, minutes=45)
+df = download_comments(api, weeks=0, hours=3, minutes=45)
 df = preprocess_comments(df)  # Sentence splitting, and more
 pipe = pipeline("ner", model=model, tokenizer=tokenizer, device=0)
 df = predict_comments(df, pipe, threshold=0.98)  # Only saves preds above threshold
@@ -85,6 +85,7 @@ save_feather(df_sub, type="submission", date=date)
 # Merge
 df_all = merge_comment_submission(df_comment=df_comment, df_sub=df_sub)
 df_history = get_posted_comments()  # Get SprakpolisenBot's previous replies to comments
+
 # Don't post twice in same thread
 df_all = df_all[~df_all["link_id"].isin(df_history["link_id"])].reset_index(drop=True)
 
@@ -99,7 +100,7 @@ pipes = translation_preprocess(
     device=device,
 )
 
-reply_msg = create_reply_msg(df_post, pipe_en=pipes[1])
+reply_msg = create_reply_msg(df_post, pipes=pipes)
 save_feather(df_all, type="all", date=date)
 
 
@@ -118,7 +119,15 @@ for i in range(len(df_all)):
             logging.error(f'Failed replying to comment id {df_post["id"][0]} because of block.')
             df_all = df_all[df_all["id"] != df_post["id"][0]]
             df_post = choose_post(df_all, min_hour=1, max_hour=15)
-            reply_msg = create_reply_msg(df_post)
+
+            #### Translate to English
+            pipes = translation_preprocess(
+                df_post,
+                model_translate=model_translate,
+                tokenizer_translate=tokenizer_translate,
+                device=device,
+            )
+            reply_msg = create_reply_msg(df_post, pipes=pipes)
 
 logging.info("Succesfully replied.")
 

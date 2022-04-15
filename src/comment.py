@@ -112,7 +112,8 @@ def correct_sentence_en(preds, correct_sens):
     introduce the wrong form of they/them with a strikethrough
     next to the already corrected instance of they/them/the/those.
     """
-
+    corrected_sv = preds[0]
+    preds_en = preds[1]
     offset = 0
     subtract_pad = -5  # <pad> token length needs to be subtracted from decoder string indices
     mistake_sens = []
@@ -120,12 +121,12 @@ def correct_sentence_en(preds, correct_sens):
     they_words = ["They", "they", "Those", "those", "The", "the"]  # Can be substituted for 'de'
     them_words = ["Them", "them"]
 
-    for pred, sentence in zip(preds, correct_sens):
+    for i, (pred, sentence) in enumerate(zip(preds_en, correct_sens)):
 
         if len(pred) == 0:
             continue
 
-        for entity in pred:
+        for j, entity in enumerate(pred):
 
             if entity["word"] not in (they_words + them_words):
                 logger.info(
@@ -138,10 +139,13 @@ def correct_sentence_en(preds, correct_sens):
             begin_idx = entity["start"] + subtract_pad + offset
             end_idx = entity["end"] + subtract_pad + offset
 
-            if entity["word"] in them_words:
+            if entity["word"] in them_words and corrected_sv[i][j]["word"] == "dem":
                 wrong_word = "they" if entity["word"][0].islower() else "They"
-            elif entity["word"] in they_words:
+            elif entity["word"] in they_words and corrected_sv[i][j]["word"] == "de":
                 wrong_word = "them" if entity["word"][0].islower() else "Them"
+            else:
+                sentence = False
+                continue
 
             sentence = (
                 f"{sentence[:begin_idx]}~~{wrong_word}~~ **{entity['word']}**{sentence[end_idx:]}"
@@ -151,13 +155,14 @@ def correct_sentence_en(preds, correct_sens):
             # Keep track of the offset in case of multiple de/dem errors in same sentence.
             offset += 9 + len(wrong_word)
 
-        mistake_sens.append(sentence)
+        if sentence:
+            mistake_sens.append(sentence)
         offset = 0
 
     return mistake_sens
 
 
-def create_reply_msg(df_post, pipe_en):
+def create_reply_msg(df_post, pipes):
     # Header
     message = create_header(df_post)
 
@@ -174,11 +179,12 @@ def create_reply_msg(df_post, pipe_en):
 
     # message += create_analysis_legend()
     # message = add_paragraph(message)
-    message = add_horizontal_rule(message)
-    message = add_paragraph(message)
+    # message = add_horizontal_rule(message)
+    # message = add_paragraph(message)
 
     correct_sens_en = correct_sentence_en(
-        preds=pipe_en["pred_pipe"], correct_sens=pipe_en["corrected_sentences"]
+        preds=[pipes[0]["pred_pipe"], pipes[1]["pred_pipe"]],
+        correct_sens=pipes[1]["corrected_sentences"],
     )
 
     if all(correct_sens_en):

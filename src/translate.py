@@ -154,7 +154,7 @@ def translation_pipe(pipes):
                         "start": (current_pipe[j]["end"] + 1)
                         if token.startswith(" ")
                         else current_pipe[j]["end"],
-                        "end": current_pipe[j]["end"] + len(token),
+                        "end": current_pipe[j]["end"] + (len(token) if token != "<unk>" else 1),
                         "index": j + 2,
                         "word": token.strip(),
                     }
@@ -179,6 +179,7 @@ def get_dedem_token_index(pipes):
     for i, preds in enumerate(sv_pipe["pred_pipe"]):
         for j, pred_token in enumerate(preds):
             for token in sv_pipe["pipe"][i]:
+
                 if (pred_token["start"] == token["start"]) and (
                     pred_token["word"].lower() == token["word"].lower()
                 ):
@@ -202,6 +203,7 @@ def decoder_pred_pipe(pipes, model_translate):
 
     for i, preds in enumerate(sv_pipe["pred_pipe"]):
         en_pred_pipe = []
+
         for j, pred_token in enumerate(preds):
             outputs = model_translate(
                 input_ids=sv_pipe["outputs"][i].input_ids,

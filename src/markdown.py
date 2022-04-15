@@ -93,7 +93,7 @@ def create_header(df_post):
     if df_post["nr_mistakes"][0] <= 2:
         message = (
             f'Tjenixen, SpråkpolisenBot här {add_emoji("police")}. Jag är en bot som '
-            f"kan skilja på `de` och `dem` i svensk text. "
+            f"skiljer på `de` och `dem`. "
         )
     if df_post["nr_mistakes"][0] >= 3:
         message = (
