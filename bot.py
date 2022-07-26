@@ -86,11 +86,12 @@ save_feather(df_sub, type="submission", date=date)
 df_all = merge_comment_submission(df_comment=df_comment, df_sub=df_sub)
 df_history = get_posted_comments()  # Get SprakpolisenBot's previous replies to comments
 
+
 # Don't post twice in same thread
 df_all = df_all[~df_all["link_id"].isin(df_history["link_id"])].reset_index(drop=True)
 
 # Choose which comment to post reply to
-df_post = choose_post(df_all, min_hour=1, max_hour=15)
+df_post = choose_post(df_all, min_hour=1, max_hour=16)
 
 #### Translate to English
 pipes = translation_preprocess(
@@ -101,6 +102,7 @@ pipes = translation_preprocess(
 )
 
 reply_msg = create_reply_msg(df_post, pipes=pipes)
+
 save_feather(df_all, type="all", date=date)
 
 
@@ -109,11 +111,11 @@ for i in range(len(df_all)):
         # Reply to chosen comment
         logging.info(f'Replying to comment id {df_post["id"][0]}.')
         comment = reddit.comment(df_post["id"][0])
-        comment.reply(reply_msg)
+        comment.reply(body=reply_msg)
         break
     except Exception as e:
         if isinstance(e, praw.exceptions.RedditAPIException):
-            # Due to incredibly stupid changes around how blocked comments work,
+            # Due to incredibly stupid changes on reddit around how blocked comments work,
             # SprakpolisenBot may be blocked from replying to anyone in a comment chain
             # if a single comment author in the comment chain has blocked SprakpolisenBot.
             logging.error(f'Failed replying to comment id {df_post["id"][0]} because of block.')

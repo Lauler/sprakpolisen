@@ -6,6 +6,7 @@ import pandas as pd
 import logging
 from nltk.tokenize import sent_tokenize
 from .utils import join_insertion
+from .markdown import remove_emoji
 
 
 logger = logging.getLogger(__name__)
@@ -203,6 +204,16 @@ def preprocess_comments(df):
     df["sentences"] = df["sentences"].apply(
         lambda sens: [sen for sen in sens if not sen[0] == ">"]
     )
+    # Remove emojis
+    df["sentences"] = df["sentences"].apply(lambda sens: [remove_emoji(sen) for sen in sens])
+
+    # Strip whitespace before and after sentence.
+    df["sentences"] = df["sentences"].apply(lambda sens: [sen.strip() for sen in sens])
+
+    # Remove 2 or more spaces in a row and replace by single space.
+    df["sentences"] = df["sentences"].apply(
+        lambda sens: [re.sub(" {2,}", " ", sen) for sen in sens]
+    )
 
     logger.info("Finished preprocessing.")
 
@@ -339,6 +350,7 @@ def merge_comment_submission(df_comment, df_sub):
     df_all["hours_since_post"] = (dt.datetime.now().timestamp() - df_all["created"]) / 3600
     df_all["hours_age_thread"] = (dt.datetime.now().timestamp() - df_all["created_sub"]) / 3600
     df_all["replied"] = False  # We have not yet replied to any of the posts
+    df_all["edited"] = df_all["edited"].astype("int64")  # Sometimes int, sometimes boolean in API
 
     return df_all
 

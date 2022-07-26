@@ -35,6 +35,14 @@ def insert_heading(header):
     return f"## {header}"
 
 
+def remove_emoji(text):
+    # https://stackoverflow.com/questions/33404752/removing-emojis-from-a-string-in-python
+
+    emoji_pattern = re.compile("[^\U00000000-\U0000d7ff\U0000e000-\U0000ffff]", flags=re.UNICODE)
+
+    return emoji_pattern.sub("", text)
+
+
 def reverse_replace(text, old, new, n):
     """
     Replace n occurences of 'old' with 'new' starting from the right side of the text.
@@ -163,7 +171,7 @@ def create_guide_en(df_post):
     """
 
     guide_message = (
-        f"[Tips](https://lauler.github.io/sprakpolisen/guide.html): Översätt till engelska. "
+        f"[Tips](https://lauler.github.io/sprakpolisen/guide.html): Använd engelskan till hjälp. "
         f"Om **them** passar bäst ska det vara `dem` på svenska. "
         f"Om **they/those/the** eller något annat passar bättre ska det vara `de`."
     )

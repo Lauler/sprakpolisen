@@ -118,33 +118,45 @@ def correct_sentence_en(preds, correct_sens):
     subtract_pad = -5  # <pad> token length needs to be subtracted from decoder string indices
     mistake_sens = []
 
-    they_words = ["They", "they", "Those", "those", "The", "the"]  # Can be substituted for 'de'
+    they_words = [
+        "They",
+        "they",
+        "Those",
+        "those",
+        "The",
+        "the",
+        "These",
+        "these",
+    ]  # Can be substituted for 'de'
     them_words = ["Them", "them"]
 
     for i, (pred, sentence) in enumerate(zip(preds_en, correct_sens)):
 
+        target_indices = []  # To check if we're trying to correct same word twice or more
+        contains_pred_mismatch = False  # Check if 'de' maps to they_words, and 'dem' to them_words
         if len(pred) == 0:
             continue
 
         for j, entity in enumerate(pred):
 
+            target_indices.append(entity["index"])
             if entity["word"] not in (they_words + them_words):
                 logger.info(
                     f"Swedish de/dem did not match corresponding English they/them/the/those for"
                     f"sentence: '{sentence}', and entity: '{entity}'"
                 )
-                sentence = False
+                contains_pred_mismatch = True
                 continue
 
             begin_idx = entity["start"] + subtract_pad + offset
             end_idx = entity["end"] + subtract_pad + offset
 
-            if entity["word"] in them_words and corrected_sv[i][j]["word"] == "dem":
+            if entity["word"] in them_words and corrected_sv[i][j]["word"].lower() == "dem":
                 wrong_word = "they" if entity["word"][0].islower() else "They"
-            elif entity["word"] in they_words and corrected_sv[i][j]["word"] == "de":
+            elif entity["word"] in they_words and corrected_sv[i][j]["word"].lower() == "de":
                 wrong_word = "them" if entity["word"][0].islower() else "Them"
             else:
-                sentence = False
+                contains_pred_mismatch = True
                 continue
 
             sentence = (
@@ -155,7 +167,7 @@ def correct_sentence_en(preds, correct_sens):
             # Keep track of the offset in case of multiple de/dem errors in same sentence.
             offset += 9 + len(wrong_word)
 
-        if sentence:
+        if not contains_pred_mismatch and (len(target_indices) == len(set(target_indices))):
             mistake_sens.append(sentence)
         offset = 0
 
@@ -187,7 +199,7 @@ def create_reply_msg(df_post, pipes):
         correct_sens=pipes[1]["corrected_sentences"],
     )
 
-    if all(correct_sens_en):
+    if len(correct_sens_en) > 0:
         # If all Swedish de/dem were matched against suitable English equivalent
         message += create_guide_en(df_post)
 
