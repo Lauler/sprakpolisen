@@ -2,7 +2,6 @@ import os
 import torch
 import pandas as pd
 import datetime as dt
-import pprint
 import logging
 import praw
 from psaw import PushshiftAPI
@@ -42,9 +41,7 @@ model.to(device)
 
 # Machine Translation model
 tokenizer_translate = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-sv-en")
-model_translate = AutoModelForSeq2SeqLM.from_pretrained(
-    "Helsinki-NLP/opus-mt-sv-en", output_attentions=True
-)
+model_translate = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-sv-en", output_attentions=True)
 model_translate.eval()
 model_translate.to(device)
 
@@ -66,7 +63,7 @@ reddit = praw.Reddit(
 
 api = PushshiftAPI(reddit)
 
-df = download_comments(api, weeks=0, hours=3, minutes=45)
+df = download_comments(api, weeks=0, hours=4, minutes=45)
 df = preprocess_comments(df)  # Sentence splitting, and more
 pipe = pipeline("ner", model=model, tokenizer=tokenizer, device=0)
 df = predict_comments(df, pipe, threshold=0.98)  # Only saves preds above threshold
@@ -84,14 +81,20 @@ save_feather(df_sub, type="submission", date=date)
 
 # Merge
 df_all = merge_comment_submission(df_comment=df_comment, df_sub=df_sub)
-df_history = get_posted_comments()  # Get SprakpolisenBot's previous replies to comments
 
+try:
+    df_history = get_posted_comments()  # Get SprakpolisenBot's previous replies to comments
+    # Don't post twice in same thread
+    df_all = df_all[~df_all["link_id"].isin(df_history["link_id"])].reset_index(drop=True)
+except:
+    pass
 
-# Don't post twice in same thread
-df_all = df_all[~df_all["link_id"].isin(df_history["link_id"])].reset_index(drop=True)
 
 # Choose which comment to post reply to
-df_post = choose_post(df_all, min_hour=1, max_hour=16)
+df_post = choose_post(df_all, min_hour=0.7, max_hour=17)
+
+# df_post = df_all.iloc[2:3].reset_index(drop=True)
+df_post["sentences"] = df_post["sentences"].apply(lambda sens: [sen.replace("…", ".") for sen in sens])
 
 #### Translate to English
 pipes = translation_preprocess(
@@ -119,8 +122,8 @@ for i in range(len(df_all)):
             # SprakpolisenBot may be blocked from replying to anyone in a comment chain
             # if a single comment author in the comment chain has blocked SprakpolisenBot.
             logging.error(f'Failed replying to comment id {df_post["id"][0]} because of block.')
-            df_all = df_all[df_all["id"] != df_post["id"][0]]
-            df_post = choose_post(df_all, min_hour=1, max_hour=15)
+            df_all = df_all[df_all["id"] != df_post["id"][0]]  # Remove unsuccessful reply attempt
+            df_post = choose_post(df_all, min_hour=1, max_hour=17)
 
             #### Translate to English
             pipes = translation_preprocess(
@@ -135,4 +138,5 @@ logging.info("Succesfully replied.")
 
 # Save replies/posted comments
 df_post["replied"] = True
+df_post["replied_time"] = pd.to_datetime(pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"))
 save_feather(df_post, type="posted", date=date)

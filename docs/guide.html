@@ -50,16 +50,17 @@ pre.numberSource code > span > a:first-child::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {   }
+  { color: #00769e; background-color: #f1f3f5; }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
+code span { color: #00769e; } /* Normal */
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
-code span.at { color: #20794d; } /* Attribute */
+code span.at { color: #657422; } /* Attribute */
 code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
-code span.cf { color: #007ba5; } /* ControlFlow */
+code span.cf { color: #00769e; } /* ControlFlow */
 code span.ch { color: #20794d; } /* Char */
 code span.cn { color: #8f5902; } /* Constant */
 code span.co { color: #5e5e5e; } /* Comment */
@@ -73,17 +74,18 @@ code span.fl { color: #ad0000; } /* Float */
 code span.fu { color: #4758ab; } /* Function */
 code span.im { } /* Import */
 code span.in { color: #5e5e5e; } /* Information */
-code span.kw { color: #007ba5; } /* Keyword */
+code span.kw { color: #00769e; } /* Keyword */
 code span.op { color: #5e5e5e; } /* Operator */
-code span.ot { color: #007ba5; } /* Other */
+code span.ot { color: #00769e; } /* Other */
 code span.pp { color: #ad0000; } /* Preprocessor */
-code span.sc { color: #20794d; } /* SpecialChar */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
 code span.ss { color: #20794d; } /* SpecialString */
 code span.st { color: #20794d; } /* String */
 code span.va { color: #111111; } /* Variable */
 code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
+
 
   <!--radix_placeholder_meta_tags-->
   <title>SpråkpolisenBot: Guide</title>
@@ -786,6 +788,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   d-article table.gt_table td,
   d-article table.gt_table th {
     border-bottom: none;
+    font-size: 100%;
   }
 
   .html-widget {
@@ -1027,10 +1030,6 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     position: relative;
     margin-bottom: 2.5em;
     margin-top: 1.5em;
-  }
-
-  .figure img {
-    width: 100%;
   }
 
   .figure .caption {
@@ -1862,7 +1861,22 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
       // hoverable references
       $('span.citation[data-cites]').each(function() {
-        var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+        const citeChild = $(this).children()[0]
+        // Do not process if @xyz has been used without escaping and without bibliography activated
+        // https://github.com/rstudio/distill/issues/466
+        if (citeChild === undefined) return true
+
+        if (citeChild.nodeName == "D-FOOTNOTE") {
+          var fn = citeChild
+          $(this).html(fn.shadowRoot.querySelector("sup"))
+          $(this).id = fn.id
+          fn.remove()
+        }
+        var refs = $(this).attr('data-cites').split(" ");
+        var refHtml = refs.map(function(ref) {
+          // Could use CSS.escape too here, we insure backward compatibility in navigator
+          return "<p>" + $('div[id="ref-' + ref + '"]').html() + "</p>";
+        }).join("\n");
         window.tippy(this, {
           allowHTML: true,
           content: refHtml,
@@ -1873,6 +1887,31 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
           placement: 'bottom-start'
         });
       });
+
+      // fix footnotes in tables (#411)
+      // replacing broken distill.pub feature
+      $('table d-footnote').each(function() {
+        // we replace internal showAtNode methode which is triggered when hovering a footnote
+        this.hoverBox.showAtNode = function(node) {
+          // ported from https://github.com/distillpub/template/pull/105/files
+          calcOffset = function(elem) {
+              let x = elem.offsetLeft;
+              let y = elem.offsetTop;
+              // Traverse upwards until an `absolute` element is found or `elem`
+              // becomes null.
+              while (elem = elem.offsetParent && elem.style.position != 'absolute') {
+                  x += elem.offsetLeft;
+                  y += elem.offsetTop;
+              }
+
+              return { left: x, top: y };
+          }
+          // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetTop
+          const bbox = node.getBoundingClientRect();
+          const offset = calcOffset(node);
+          this.show([offset.left + bbox.width, offset.top + bbox.height]);
+        }
+      })
 
       // clear polling timer
       clearInterval(tid);
@@ -1972,6 +2011,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     // mark non-body figures created by knitr chunks as 100% width
     $('.layout-chunk').each(function(i, val) {
       var figures = $(this).find('img, .html-widget');
+      // ignore leaflet img layers (#106)
+      figures = figures.filter(':not(img[class*="leaflet"])')
       if ($(this).attr('data-layout') !== "l-body") {
         figures.css('width', '100%');
       } else {
@@ -1994,7 +2035,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     // get rid of index.html references in header
     if (window.location.protocol !== "file:") {
       $('.distill-site-header a[href]').each(function(i,val) {
-        $(this).attr('href', $(this).attr('href').replace("index.html", "./"));
+        $(this).attr('href', $(this).attr('href').replace(/^index[.]html/, "./"));
       });
     }
 
@@ -2033,13 +2074,14 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </script>
 
   <!--/radix_placeholder_distill-->
-  <script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
+  <script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
   <script src="site_libs/core-js-2.5.3/shim.min.js"></script>
   <script src="site_libs/react-17.0.0/react.min.js"></script>
   <script src="site_libs/react-17.0.0/react-dom.min.js"></script>
   <script src="site_libs/reactwidget-1.0.0/react-tools.js"></script>
-  <script src="site_libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
-  <script src="site_libs/reactable-binding-0.2.3.9000/reactable.js"></script>
+  <script src="site_libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+  <link href="site_libs/reactable-0.4.1/reactable.css" rel="stylesheet" />
+  <script src="site_libs/reactable-binding-0.4.1/reactable.js"></script>
   <script src="site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -2095,6 +2137,24 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 
 <div class="d-article">
+<div class="layout-chunk" data-layout="l-body">
+<style type="text/css">
+.spoiler{
+  display: inline-block;
+  position: relative;
+  color: transparent;
+  width: 3.5ch;
+  background-color: lightgrey;
+}
+
+.spoiler:hover{
+  color: black;
+  background-color: transparent;
+}
+
+
+</style>
+</div>
 <p>I modernt svenskt talspråk uttalas både <strong><code>de</code></strong> och <strong><code>dem</code></strong> nästan uteslutande som <strong><code>\dåmm\</code></strong>. Skriftspråket skiljer dock fortfarande på formerna. Nedan listar SpråkpolisenBot ett par kortfattade tips kring hur du snabbt kan gå från <em>osäker</em> till <em>fortfarande-något-osäker</em> men i de allra flesta fall korrekt användning av <strong><code>de</code></strong> och <strong><code>dem</code></strong>.</p>
 <h2 id="sec1">1. Om du är osäker, gissa alltid på ‘<code>de</code>’</h2>
 <p><strong><code>De</code></strong> är cirka tio gånger vanligare i svenskt skriftspråk jämfört med <strong><code>dem</code></strong>. Om du är någon som genomgående och konsekvent (över)använder <strong><code>dem</code></strong> bör du vara väldigt medveten om att</p>
@@ -2102,85 +2162,93 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <li>Felaktig användning av <strong><code>dem</code></strong> är det som sticker mest i ögonen hos dem som kan skilja mellan <strong><code>de</code></strong> och <strong><code>dem</code></strong>. Att genomgående skriva <strong><code>dem</code></strong> är därmed att göra sig själv en stor otjänst.</li>
 <li>Felaktig använding av <strong><code>de</code></strong> uppfattas indirekt som mindre allvarligt. Eftersom <strong><code>de</code></strong> förekommer i såpass större utsträckning är sannolikheten högre att du gör rätt av ren slump. I de fall där du ändå råkat göra fel uppfattas det dessutom som mindre allvarligt och ses som ett enstaka misstag.</li>
 </ol>
-<p>Om du konsekvent använder <strong><code>de</code></strong> har du fel endast cirka <span class="math inline">\(10\%\)</span> av de tillfällen du använder ordet. Är du istället någon som konsekvent använder <strong><code>dem</code></strong>, kommer det rent statistiskt bli fel mer än <span class="math inline">\(9\)</span> av <span class="math inline">\(10\)</span> gånger. Använd statistiken till din fördel – gissa <strong><code>de</code></strong>!</p>
-<h2 id="sec2">2. Ersätt ‘de’ med ‘they’, och ‘dem’ med ‘them’</h2>
-<p>I många fall kan man använda engelskan och svenskan till sin fördel och ersätta <strong><code>de</code></strong> med och <strong><code>dem</code></strong> med andra så kallade “personliga pronomen”. En föreslagen strategi är alltså att översätta meningen till engelska. Om det står <strong><code>they</code></strong> i den översatta meningen ska det vara <strong><code>de</code></strong> i svenska, och motsvarande <strong><code>dem</code></strong> där det står <strong><code>them</code></strong>. Vi listar nedan, i varsin kolumn, några olika sätt som <strong><code>de</code></strong> respektive <strong><code>dem</code></strong> kan ersättas med alternativa personliga pronomen från både svenskan och engelskan:</p>
+<p>Om du konsekvent använder <strong><code>de</code></strong> gör du endast fel cirka <span class="math inline">\(10\%\)</span> av de tillfällen du använder ordet. Är du istället någon som konsekvent använder <strong><code>dem</code></strong>, kommer det rent statistiskt bli fel mer än <span class="math inline">\(9\)</span> av <span class="math inline">\(10\)</span> gånger. Använd statistiken till din fördel: gissa <strong><code>de</code></strong>!</p>
+<h2 id="sec2">2. Översätt till engelska och se om ‘them’ passar</h2>
+<p>I många fall kan vi använda vår språkliga intuition från både svenskan och engelskan till vår fördel. En ganska enkel strategi för att lista ut huruvida det ska vara <strong><code>de</code></strong> eller <strong><code>dem</code></strong>, är att översätta meningen – eller några enstaka ord runtomkring – till engelska. En kortfattad minnesregel som nästan alltid fungerar är:</p>
+<blockquote>
+<p>Översätt meningen till engelska. Om <strong><code>them</code></strong> passar bäst ska det vara <strong><code>dem</code></strong> på svenska. Om <strong><code>they</code></strong> eller något annat (t.ex. <strong><code>the</code></strong>, <strong><code>those</code></strong> eller <strong><code>these</code></strong>) passar bättre kan <strong><code>de</code></strong> användas.</p>
+</blockquote>
+<p>Minnesregeln kan egentligen förkortas ytterligare till att endast lyda</p>
+<blockquote>
+<p>Översätt meningen till engelska. Om <strong><code>them</code></strong> passar bäst ska det vara <strong><code>dem</code></strong> på svenska. I övriga fall går det bra att använda <strong><code>de</code></strong>.</p>
+</blockquote>
+<p>Exempel (håll musen över den grå rutan för facit):</p>
+<blockquote>
+<p>Läraren trodde att <span class="spoiler">de</span> hade glömt läxorna.<br />
+The teacher thought <strong><code>they</code></strong> had forgotten the homework.</p>
+</blockquote>
+<p><strong><code>They</code></strong> passar bäst, alltså ska det vara <strong><code>de</code></strong>.</p>
+<blockquote>
+<p>Ni såg <span class="spoiler">dem</span> komma ner för trapporna.<br />
+You saw <strong><code>them</code></strong> come down the stairs.</p>
+</blockquote>
+<p><strong><code>Them</code></strong> passar bäst, alltså ska det vara <strong><code>dem</code></strong>.</p>
+<p>Ett till exempel:</p>
+<blockquote>
+<p><span class="spoiler">De</span> gick till restaurangen och <span class="spoiler">de</span> åt allt <span class="spoiler">de</span> såg omkring <span class="spoiler">dem</span>.<br />
+<strong><code>They</code></strong> went to the restaurant and <strong><code>they</code></strong> ate everything <strong><code>they</code></strong> saw around <strong><code>them</code></strong>.</p>
+</blockquote>
+<p>De tre första användningarna ska vara <strong><code>de</code></strong> eftersom de översattes till <strong><code>they</code></strong>, medan den sista ska vara <strong><code>dem</code></strong>.</p>
+<p>Det finns även fall där översättningen kan bli <strong><code>the</code></strong>, <strong><code>those</code></strong>, eller <strong><code>these</code></strong>. I samtliga dessa fall går det att använda <strong><code>de</code></strong> på svenska.</p>
+<blockquote>
+<p>Jag såg <span class="spoiler">de</span> andra eleverna fuska.<br />
+I saw <strong><code>the</code></strong> other students cheat.</p>
+</blockquote>
+<blockquote>
+<p><span class="spoiler">De</span> här spelarna har inte tränat på en vecka.<br />
+<strong><code>These</code></strong> players haven’t practiced for a week.</p>
+</blockquote>
+<blockquote>
+<p>Vi gick förbi <span class="spoiler">de</span> där träden för en timma sedan.<br />
+We walked past <strong><code>those</code></strong> trees one hour ago.</p>
+</blockquote>
+<blockquote>
+<p>Hon behandlade <span class="spoiler">de</span> patienter som insjuknade med antibiotika.<br />
+She treated <strong><code>the</code></strong> patients who fell ill with antibiotics.</p>
+</blockquote>
+<h2 id="ersätt-med-oss-och-se-om-det-passar">3. Ersätt med ‘oss’ och se om det passar</h2>
+<p>En annan liknande strategi för den som hellre vill använder sig av svenskan, är att ersätta varje <strong><code>de</code></strong> och <strong><code>dem</code></strong> med ett <strong><code>oss</code></strong>, och se om det passar in i meningen. Ibland rekommenderas att testa att ersätta med både <strong><code>vi</code></strong> och <strong><code>oss</code></strong>, men det räcker faktiskt att endast testa om <strong><code>oss</code></strong> passar. En minnesregel som kan tillämpas här lyder:</p>
+<blockquote>
+<p>Ersätt <strong><code>de</code></strong> och <strong><code>dem</code></strong> med ett <strong><code>oss</code></strong>. Om ordet <strong><code>oss</code></strong> passar in i meningen ska det vara <strong><code>dem</code></strong>. I övriga fall kan <strong><code>de</code></strong> användas.</p>
+</blockquote>
+<p>Exempel:</p>
+<blockquote>
+<p>Läraren trodde att <span class="spoiler">de</span> hade glömt läxorna.<br />
+Läraren trodde att <del><strong><code>oss</code></strong></del> hade glömt läxorna.</p>
+</blockquote>
+<p><del><strong><code>Oss</code></strong></del> passar inte särskilt bra. Alltså ska det vara <strong><code>de</code></strong>.</p>
+<blockquote>
+<p>Ni såg <span class="spoiler">dem</span> komma ner för trapporna.<br />
+Ni såg <strong><code>oss</code></strong> komma ner för trapporna.</p>
+</blockquote>
+<p><strong><code>Oss</code></strong> passar. Alltså ska det vara <strong><code>dem</code></strong>.</p>
+<p>Låt oss testa även de andra exemplen:</p>
+<blockquote>
+<p><span class="spoiler">De</span> gick till restaurangen och <span class="spoiler">de</span> åt allt <span class="spoiler">de</span> såg omkring <span class="spoiler">dem</span>.<br />
+<del><strong><code>Oss</code></strong></del> gick till restaurangen och <del><strong><code>oss</code></strong></del> åt allt <del><strong><code>oss</code></strong></del> såg omkring <strong><code>oss</code></strong>.</p>
+</blockquote>
+<blockquote>
+<p>Jag såg <span class="spoiler">de</span> andra eleverna fuska.<br />
+Jag såg <del><strong><code>oss</code></strong></del> andra eleverna fuska.</p>
+</blockquote>
+<blockquote>
+<p><span class="spoiler">De</span> här spelarna har inte tränat på en vecka.<br />
+<del><strong><code>Oss</code></strong></del> här spelarna har inte tränat på en vecka.</p>
+</blockquote>
+<blockquote>
+<p>Vi gick förbi <span class="spoiler">de</span> där träden för en timma sedan.<br />
+Vi gick förbi <del><strong><code>oss</code></strong></del> där träden för en timma sedan.</p>
+</blockquote>
+<blockquote>
+<p>Hon behandlade <span class="spoiler">de</span> patienter som insjuknade med antibiotika.<br />
+Hon behandlade <strong><code>oss</code></strong> (?) patienter som insjuknade med antibiotika.</p>
+</blockquote>
+<p>I de flesta fall är det tydligt vilka <strong><code>oss</code></strong> som inte passar in. Men det är inte i samtliga fall lika solklart vad som passar bäst jämfört med metoden där vi översatte till engelska. Meningen “Hon behandlade oss patienter som insjuknade med antibiotika” ser tillräckligt bra ut för att kunna hävda att <strong><code>oss</code></strong> passar, trots att det ska vara <strong><code>de</code></strong>. Jag rekommenderar därför att i första hand använda metoden som går via engelskan, då denna inte leder till tvetydigheter lika ofta.</p>
+<p>Vi är inte låsta till att endast ersätta med <strong><code>vi</code></strong> eller <strong><code>oss</code></strong> vid användning ovanstående tips. Nedan listas, i varsin kolumn, några olika sätt som <strong><code>de</code></strong> respektive <strong><code>dem</code></strong> kan ersättas med alternativa personliga pronomen från både svenskan och engelskan:</p>
 <div class="layout-chunk" data-layout="l-body">
-<div id="htmlwidget-c108f8317fb63f656e69" class="reactable html-widget" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-c108f8317fb63f656e69">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"Subjektsform":["de","jag","du","han","hon","vi","ni","they"],"Objektsform":["dem","mig","dig","honom","henne","oss","er","them"]},"columns":[{"accessor":"Subjektsform","name":"Subjektsform","type":"character"},{"accessor":"Objektsform","name":"Objektsform","type":"character"}],"sortable":false,"defaultPageSize":10,"paginationType":"numbers","showPageInfo":true,"minRows":1,"bordered":true,"dataKey":"3b126e604ad46f626e541672c373de7c"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-487050dbeb5525e4c61f" class="reactable html-widget" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-487050dbeb5525e4c61f">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"Subjektsform":["de","jag","du","han","hon","vi","ni","they"],"Objektsform":["dem","mig","dig","honom","henne","oss","er","them"]},"columns":[{"id":"Subjektsform","name":"Subjektsform","type":"character"},{"id":"Objektsform","name":"Objektsform","type":"character"}],"sortable":false,"bordered":true,"dataKey":"63a5968de160fea7ac5d5bccfaac36bd"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
 </div>
-<blockquote>
-<p><strong><code>De</code></strong> gick till restaurangen och <strong><code>de</code></strong> åt allt <strong><code>de</code></strong> såg omkring <strong><code>dem</code></strong>.</p>
-</blockquote>
-<blockquote>
-<p><strong><code>They</code></strong> went to the restaurant and <strong><code>they</code></strong> ate everything <strong><code>they</code></strong> saw around <strong><code>them</code></strong>.</p>
-</blockquote>
-<blockquote>
-<p><strong><code>Jag</code></strong> gick till restaurangen och <strong><code>jag</code></strong> åt allt <strong><code>jag</code></strong> såg omkring <strong><code>mig</code></strong>.</p>
-</blockquote>
-<blockquote>
-<p><strong><code>Vi</code></strong> gick till restaurangen och <strong><code>vi</code></strong> åt allt <strong><code>vi</code></strong> såg omkring <strong><code>oss</code></strong>.</p>
-</blockquote>
-<p>När grammatiknördar ska förklara hur man skiljer på <strong><code>de</code></strong> och <strong><code>dem</code></strong> börjar de oftast prata om “subjekt” och “objekt”. SpråkpolisenBot tänker inte gå in på det annat än att med hjälp av tabellen notera att de flesta av oss faktiskt intuitivt kan skilja på subjekt- och objektsform när de båda formerna inte uttalas likadant. Om du är osäker huruvida det ska vara <strong><code>de</code></strong> eller <strong><code>dem</code></strong>, testa alltså då att ersätta <strong><code>de</code></strong> med exempelvis <strong>jag/vi/ni/they</strong>, och motsvarande <strong><code>dem</code></strong> med <strong>mig/oss/er/them</strong>.</p>
-<p>Ovanstående trick funkar i majoriteten av fallen, men inte alltid. Här är ett fall där det inte riktigt fungerar:</p>
-<blockquote>
-<p>Jag såg <strong><code>dem</code></strong> komma runt hörnet och gå i riktning mot <strong><code>de</code></strong> byggnaderna.</p>
-</blockquote>
-<blockquote>
-<p>I saw <strong><code>them</code></strong> come around the corner and walk in the direction of those buildings.</p>
-</blockquote>
-<blockquote>
-<p>I saw <strong><code>them</code></strong> come around the corner and walk towards the buildings.</p>
-</blockquote>
-<p>Det går inte att enkelt direktöversätta. En regel som går att använda här är istället: om <strong><code>de/dem</code></strong> går att ersätta med <strong><code>the</code></strong> ska det vara <strong><code>de</code></strong> (se punkt nummer <span class="math inline">\(4\)</span>).</p>
-<p>En kombination av strategi <span class="math inline">\(1\)</span> samt <span class="math inline">\(2\)</span> leder till att vi nu begår såpass få fel att ingen egentligen kommer att reagera i det fall vi råkar göra fel.</p>
-<h2 id="både-dedem-funkar-oftast-vid-dedem-som">3. Både ‘de/dem’ funkar oftast vid ‘de/dem som’</h2>
-<p>Det tredje tipset är enkelt och kräver inte någon vidare tankekraft att tillämpa. När <strong><code>de</code></strong> eller <strong><code>dem</code></strong> åtföljs av ett <strong><code>som</code></strong>, är det okej att använda båda formerna.</p>
-<blockquote>
-<p>Sweddit ogillar <strong><code>de/dem</code></strong> som skriver fel.</p>
-</blockquote>
-<p>Anledningen är att meningen kan brytas upp i två delar på olika sätt:</p>
-<blockquote>
-<p>Sweddit ogillar <strong><code>dem</code></strong>.</p>
-</blockquote>
-<blockquote>
-<p><strong><code>De</code></strong> som skriver fel.</p>
-</blockquote>
-<p>Huruvida <strong><code>de/dem</code></strong> tillhör huvudsatsen (den första delen) eller bisatsen (den andra delen) är inte klart. Här har språket utvecklats något över tid. Tidigare ansågs <strong><code>dem som</code></strong> korrekt i följande fall:</p>
-<blockquote>
-<p>Han var bäst bland <strong><code>dem som</code></strong> närvarade.</p>
-</blockquote>
-<p>Numera anses <strong><code>de som</code></strong> också som ett acceptabelt alternativ.</p>
-<h2 id="använd-de-vid-substantiv-i-bestämd-form">4. Använd ‘de’ vid substantiv i bestämd form</h2>
-<p>Om vi har <strong><code>de/dem</code></strong> i nära anslutning till ett substantiv i plural och bestämd form, ska det vara <strong><code>de</code></strong>. Vi återkommer till det tidigare exemplet:</p>
-<blockquote>
-<p>Jag såg <strong><code>dem</code></strong> komma runt hörnet och gå i riktning mot <strong><code>de</code></strong> byggnader<strong>na</strong>.</p>
-</blockquote>
-<p>Notera byggnader<strong>na</strong>.</p>
-<p>Fler exempel:</p>
-<blockquote>
-<p>Jag betalade för <strong><code>de</code></strong> dyra bilar<strong>na</strong>.</p>
-</blockquote>
-<blockquote>
-<p>Ni borde öppna dörren för <strong><code>de</code></strong> fem gäster<strong>na</strong>.</p>
-</blockquote>
-<p>Hade vi kapat av den sista meningen innan “fem gästerna” hade istället följande varit korrekt:</p>
-<blockquote>
-<p>Ni borde öppna för <strong><code>dem</code></strong>.</p>
-</blockquote>
-<p>Men så fort vi har substantiv (saker som bord, bollar, skärmar) i bestämd form (borden, bollarna, skärmarna) ska det alltid vara <strong><code>de</code></strong>.</p>
-<p>Det svenska <strong><code>de</code></strong> används i två olika betydelser. Dels i betydelsen <strong>they</strong>, men även i en annan betydelse som motsvarar engelskans <strong>the</strong> eller tyskans <strong>die/der</strong>. I grammatiktermer heter det att <strong><code>de</code></strong> är en <em>bestämd artikel</em> i den andra användningen. Därför ska det <em>alltid</em> vara <strong><code>de</code></strong> om vi i en översättning kan byta ut <strong><code>de</code></strong> eller <strong><code>dem</code></strong> med <strong>the</strong>.</p>
-<p>Till exempel heter det på svenska alltid: <strong><code>de</code></strong> flesta, <strong><code>de</code></strong> andra. Det ska aldrig vara <del>dem</del> i föregående fall. Även vid meningar som</p>
-<blockquote>
-<p>Jag har sett <strong><code>de</code></strong> andra.</p>
-</blockquote>
-<blockquote>
-<p>Vi såg <strong><code>de</code></strong> flesta misslyckas.</p>
-</blockquote>
-<blockquote>
-<p>Real Madrid besegrade <strong><code>de</code></strong> bästa lag<strong>en</strong> i gruppspelet.</p>
-</blockquote>
-<p>Anledningen är just för att <strong><code>de</code></strong> fungerar som <em>bestämd artikel</em> i samtliga ovanstående fall.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->

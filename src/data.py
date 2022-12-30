@@ -93,7 +93,7 @@ def filter_dedem_sentences(sentences):
 
 def predict_dedem(comment, pipe):
     """
-    Input: Sentence splitted comment. 
+    Input: Sentence splitted comment.
     Keep only "de" or "dem" predictions where model has predicted
     differently from the text that was present in the comment.
     """
@@ -106,9 +106,7 @@ def predict_dedem(comment, pipe):
 
     pred_list = []
     for pred in preds:
-        pred_list.append(
-            [d for d in pred if (d["entity"] != "ord") and (d["entity"].lower() != d["word"])]
-        )
+        pred_list.append([d for d in pred if (d["entity"] != "ord") and (d["entity"].lower() != d["word"])])
 
     return pred_list
 
@@ -131,9 +129,7 @@ def start_time(weeks=0, days=0, hours=2, minutes=10):
     """
     How many days, hours and minutes back to query reddit for comments.
     """
-    start_time = dt.datetime.now() - dt.timedelta(
-        weeks=weeks, days=days, hours=hours, minutes=minutes
-    )
+    start_time = dt.datetime.now() - dt.timedelta(weeks=weeks, days=days, hours=hours, minutes=minutes)
     return int(start_time.timestamp())
 
 
@@ -183,27 +179,26 @@ def download_comments(api, weeks=0, days=0, hours=2, minutes=10):
 
 def preprocess_comments(df):
     logger.info(f"Preprocessing {len(df)} comments...")
+
+    # Remove sentences that are quotes from other comments.
+    # Comments that start with ">" and end with "\n\n" are quotes.
+    df["body_temp"] = df["body"].str.replace(">.*\n\n", "", regex=True)
+    df["body_temp"] = df["body_temp"].str.replace("\n\n\n", "\n\n", regex=True)
+
     # Split comment body into list of sentences
-    df["sentences"] = df["body"].apply(lambda doc: sent_tokenize(doc, language="swedish"))
+    df["sentences"] = df["body_temp"].apply(lambda doc: sent_tokenize(doc, language="swedish"))
+    df = df.drop(columns=["body_temp"])
 
     # Keep only sentences with de/dem
     df["sentences"] = df["sentences"].apply(lambda sen: filter_dedem_sentences(sen))
-    df = df[df["sentences"].apply(lambda x: any([len(y) != 0 for y in x])) > 0].reset_index(
-        drop=True
-    )
+    df = df[df["sentences"].apply(lambda x: any([len(y) != 0 for y in x])) > 0].reset_index(drop=True)
 
-    # Split sentences also on new paragraphs "\n\n"
+    # Split sentences also on new paragraphs "\n\n" (in case someone doesn't use punctuation)
     df["sentences"] = df["sentences"].apply(lambda sens: [sen.splitlines() for sen in sens])
     # Flatten list of lists and remove empty sentences consisting of only ''.
-    df["sentences"] = df["sentences"].apply(
-        lambda sens: [sen for split_sens in sens for sen in split_sens]
-    )
+    df["sentences"] = df["sentences"].apply(lambda sens: [sen for split_sens in sens for sen in split_sens])
     df["sentences"] = [[sen for sen in sens if len(sen) > 0] for sens in df["sentences"]]
 
-    # Remove sentences that are quotes from other comments (comments that start with ">")
-    df["sentences"] = df["sentences"].apply(
-        lambda sens: [sen for sen in sens if not sen[0] == ">"]
-    )
     # Remove emojis
     df["sentences"] = df["sentences"].apply(lambda sens: [remove_emoji(sen) for sen in sens])
 
@@ -211,9 +206,7 @@ def preprocess_comments(df):
     df["sentences"] = df["sentences"].apply(lambda sens: [sen.strip() for sen in sens])
 
     # Remove 2 or more spaces in a row and replace by single space.
-    df["sentences"] = df["sentences"].apply(
-        lambda sens: [re.sub(" {2,}", " ", sen) for sen in sens]
-    )
+    df["sentences"] = df["sentences"].apply(lambda sens: [re.sub(" {2,}", " ", sen) for sen in sens])
 
     logger.info("Finished preprocessing.")
 
@@ -254,23 +247,15 @@ def count_incorrect(preds, word):
 def filter_comments(df):
     logger.info("Filtering comments...")
     # Remove rows with only empty predictions (i.e. sentence preds under the threshold)
-    df_comment = df[df["pred"].apply(lambda x: any([len(y) != 0 for y in x])) > 0].reset_index(
-        drop=True
-    )
+    df_comment = df[df["pred"].apply(lambda x: any([len(y) != 0 for y in x])) > 0].reset_index(drop=True)
 
     # Create extra variables
     df_comment["nr_mistakes"] = df_comment["pred"].apply(lambda x: sum([len(y) for y in x]))
-    df_comment["nr_mistakes_de"] = df_comment["pred"].apply(
-        lambda x: count_incorrect(x, word="de")
-    )
-    df_comment["nr_mistakes_dem"] = df_comment["pred"].apply(
-        lambda x: count_incorrect(x, word="dem")
-    )
+    df_comment["nr_mistakes_de"] = df_comment["pred"].apply(lambda x: count_incorrect(x, word="de"))
+    df_comment["nr_mistakes_dem"] = df_comment["pred"].apply(lambda x: count_incorrect(x, word="dem"))
     df_comment["author"] = df_comment["author"].apply(lambda x: x.name if x is not None else None)
     df_comment = df_comment[df_comment["author"] != "SprakpolisenBot"]  # Filter out bot's comments
-    df_comment["subreddit"] = df_comment["subreddit"].apply(
-        lambda x: x.display_name if x is not None else None
-    )
+    df_comment["subreddit"] = df_comment["subreddit"].apply(lambda x: x.display_name if x is not None else None)
 
     if len(df_comment) > 0:
         df_comment["time_downloaded"] = int(dt.datetime.now().timestamp())
@@ -305,7 +290,7 @@ def download_submission(link_ids, reddit_api, backoff_factor=0.4):
     for link_id in link_ids:
         for i in range(5):
             # Exponential backoff
-            backoff_time = backoff_factor * (2 ** i)
+            backoff_time = backoff_factor * (2**i)
 
             try:
                 submission = reddit_api.submission(id=link_id)
@@ -359,11 +344,50 @@ def get_posted_comments(folder="data/posted"):
     """
     Retrieve and save posted comments to single file.
     """
+    posted_files = os.listdir(folder)
 
+    if len(posted_files) == 0:
+        df_posted = pd.read_feather("data/posted_aggregated/df_posted.feather")
+        df_posted.to_feather("data/df_posted.feather")
+        return df_posted
+    else:
+        df_gen = (pd.read_feather(os.path.join(folder, file)) for file in posted_files)
+        df = pd.concat(df_gen).reset_index(drop=True)
+
+        if os.path.exists("data/posted_aggregated/df_posted.feather"):
+            df_posted = pd.read_feather("data/posted_aggregated/df_posted.feather")
+            df = pd.concat([df, df_posted]).reset_index(drop=True)
+
+        df.to_feather("data/df_posted.feather")
+
+    return df
+
+
+def aggregate_posted_comments(folder="data/posted"):
+    """
+    Aggregate posted comments to single file.
+    """
     posted_files = os.listdir(folder)
     df_gen = (pd.read_feather(os.path.join(folder, file)) for file in posted_files)
     df = pd.concat(df_gen)
-    df = df.reset_index(drop=True)
-    df.to_feather("data/df_posted.feather")
+    # Match pattern until _posted.feather for each file in posted_files with re.match
+    posted_files = [re.match(r"(.*)_posted\.feather", file).group(1) for file in posted_files]
+    posted_files = [re.sub("_", " ", file) for file in posted_files]
+
+    posted_files = [re.sub(r"(\d{4}-\d{2}-\d{2}\s\d{2})-(\d{2})", r"\1:\2", file) for file in posted_files]
+
+    df["replied_time"] = posted_files
+    df["replied_time"] = pd.to_datetime(df["replied_time"])
+
+    df = df.sort_values("replied_time", ascending=False).reset_index(drop=True)
+
+    if os.path.exists("data/posted_aggregated/df_posted.feather"):
+        df_posted = pd.read_feather("data/posted_aggregated/df_posted.feather")
+        df = pd.concat([df, df_posted]).reset_index(drop=True)
+
+    dest_dir = folder + "_aggregated"
+    print(dest_dir)
+    os.makedirs(dest_dir, exist_ok=True)
+    df.to_feather(os.path.join(dest_dir, "df_posted.feather"))
 
     return df

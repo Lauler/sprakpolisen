@@ -171,7 +171,7 @@ def create_guide_en(df_post):
     """
 
     guide_message = (
-        f"[Tips](https://lauler.github.io/sprakpolisen/guide.html): Använd engelskan till hjälp. "
+        f"[Tips](https://lauler.github.io/sprakpolisen/guide.html): Ta engelskan till hjälp. "
         f"Om **them** passar bäst ska det vara `dem` på svenska. "
         f"Om **they/those/the** eller något annat passar bättre ska det vara `de`."
     )
