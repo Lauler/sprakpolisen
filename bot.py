@@ -1,29 +1,25 @@
+import logging
 import os
 import torch
+import praw
 import pandas as pd
 import datetime as dt
-import logging
-import praw
-from psaw import PushshiftAPI
+from dotenv import load_dotenv
 from transformers import (
-    AutoTokenizer,
-    AutoModelForTokenClassification,
     AutoModelForSeq2SeqLM,
+    AutoModelForTokenClassification,
+    AutoTokenizer,
     pipeline,
 )
 from src.comment import choose_post, create_reply_msg
 from src.data import (
-    download_comments,
+    analyze_comments,
     download_submission,
-    filter_comments,
     get_posted_comments,
     merge_comment_submission,
-    predict_comments,
-    preprocess_comments,
     save_feather,
 )
 from src.translate import translation_preprocess
-from dotenv import load_dotenv
 
 logging.basicConfig(
     filename="sprakpolisen.log",
@@ -39,9 +35,14 @@ tokenizer = AutoTokenizer.from_pretrained("Lauler/deformer", model_max_length=25
 model = AutoModelForTokenClassification.from_pretrained("Lauler/deformer")
 model.to(device)
 
+# NER pipeline
+pipe = pipeline("ner", model=model, tokenizer=tokenizer, device=0)
+
 # Machine Translation model
 tokenizer_translate = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-sv-en")
-model_translate = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-sv-en", output_attentions=True)
+model_translate = AutoModelForSeq2SeqLM.from_pretrained(
+    "Helsinki-NLP/opus-mt-sv-en", output_attentions=True
+)
 model_translate.eval()
 model_translate.to(device)
 
@@ -61,22 +62,27 @@ reddit = praw.Reddit(
     password=pw,
 )
 
-api = PushshiftAPI(reddit)
+subreddit = reddit.subreddit("sweden")
 
-df = download_comments(api, weeks=0, hours=4, minutes=45)
-df = preprocess_comments(df)  # Sentence splitting, and more
-pipe = pipeline("ner", model=model, tokenizer=tokenizer, device=0)
-df = predict_comments(df, pipe, threshold=0.98)  # Only saves preds above threshold
-df_comment = filter_comments(df)
 
-#### Write comment info to file ####
+df_subs = []
+df_comments = []
+
+for submission in subreddit.hot(limit=35):
+    if submission.num_comments == 0:
+        continue
+
+    df_sub = download_submission(submission)
+    df_comment = analyze_comments(submission, pipe=pipe)
+    df_subs.append(df_sub)
+    df_comments.append(df_comment)
+
+df_sub = pd.concat(df_subs).reset_index(drop=True)
+df_comment = pd.concat(df_comments).reset_index(drop=True)
+
+#### Write comment and submission info to file ####
 date = dt.datetime.now().strftime("%Y-%m-%d_%H-%M")
 save_feather(df_comment, type="comment", date=date)
-
-
-#### Download info about submission thread ####
-df_comment["id_sub"] = df_comment["link_id"].str.slice(start=3)
-df_sub = download_submission(df_comment["id_sub"].tolist(), reddit_api=reddit)
 save_feather(df_sub, type="submission", date=date)
 
 # Merge
@@ -89,12 +95,17 @@ try:
 except:
     pass
 
+df_all = df_all[~(df_all["n_mis_det"] == 1)].reset_index(drop=True)
 
 # Choose which comment to post reply to
-df_post = choose_post(df_all, min_hour=0.7, max_hour=17)
+df_post = choose_post(df_all, min_hour=0.7, max_hour=19)
 
-# df_post = df_all.iloc[2:3].reset_index(drop=True)
-df_post["sentences"] = df_post["sentences"].apply(lambda sens: [sen.replace("…", ".") for sen in sens])
+df_all.columns
+# df_post = df_all.iloc[1:2].reset_index(drop=True)
+
+df_post["sentences"] = df_post["sentences"].apply(
+    lambda sens: [sen.replace("…", ".") for sen in sens]
+)
 
 #### Translate to English
 pipes = translation_preprocess(
@@ -106,8 +117,8 @@ pipes = translation_preprocess(
 
 reply_msg = create_reply_msg(df_post, pipes=pipes)
 
-save_feather(df_all, type="all", date=date)
 
+save_feather(df_all, type="all", date=date)
 
 for i in range(len(df_all)):
     try:
@@ -123,7 +134,7 @@ for i in range(len(df_all)):
             # if a single comment author in the comment chain has blocked SprakpolisenBot.
             logging.error(f'Failed replying to comment id {df_post["id"][0]} because of block.')
             df_all = df_all[df_all["id"] != df_post["id"][0]]  # Remove unsuccessful reply attempt
-            df_post = choose_post(df_all, min_hour=1, max_hour=17)
+            df_post = choose_post(df_all, min_hour=1, max_hour=19)
 
             #### Translate to English
             pipes = translation_preprocess(
@@ -133,6 +144,7 @@ for i in range(len(df_all)):
                 device=device,
             )
             reply_msg = create_reply_msg(df_post, pipes=pipes)
+
 
 logging.info("Succesfully replied.")
 

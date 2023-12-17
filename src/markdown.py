@@ -52,8 +52,8 @@ def reverse_replace(text, old, new, n):
 
 
 def wrongful_de_dem(df_post):
-    de_nr = df_post["nr_mistakes_de"].iloc[0]
-    dem_nr = df_post["nr_mistakes_dem"].iloc[0]
+    de_nr = df_post["n_mis_de"].iloc[0]
+    dem_nr = df_post["n_mis_dem"].iloc[0]
 
     if de_nr == 0 and dem_nr > 0:
         wrongful_msg = f"**{dem_nr}** felaktiga användningar av `dem`"
@@ -61,15 +61,10 @@ def wrongful_de_dem(df_post):
         wrongful_msg = f"**{de_nr}** felaktiga användningar av `de`"
     elif de_nr > 0 and dem_nr > 0:
         wrongful_msg = (
-            f"**{de_nr}** felaktiga användningar av `de` "
-            f"samt **{dem_nr}** felaktiga användningar av `dem`"
+            f"**{de_nr}** felaktiga användningar av `de` " f"samt **{dem_nr}** felaktiga användningar av `dem`"
         )
 
-    if (
-        (de_nr == 1 and dem_nr == 0)
-        or (de_nr == 0 and dem_nr == 1)
-        or (de_nr == 1 and dem_nr == 1)
-    ):
+    if (de_nr == 1 and dem_nr == 0) or (de_nr == 0 and dem_nr == 1) or (de_nr == 1 and dem_nr == 1):
         wrongful_msg = wrongful_msg.replace("felaktiga", "felaktig")
         wrongful_msg = wrongful_msg.replace("användningar", "användning")
 
@@ -98,12 +93,20 @@ def create_analysis_legend():
 
 def create_header(df_post):
 
-    if df_post["nr_mistakes"][0] <= 2:
+    if df_post["n_mis_det"][0] >= 2:
+        ts = ""
+        for _ in range(0, df_post["n_mis_det"][0]):
+            ts += "**t** "
+
         message = (
-            f'Tjenixen, SpråkpolisenBot här {add_emoji("police")}. Jag är en bot som '
-            f"skiljer på `de` och `dem`. "
+            f'Tjenixen, SpråkpolisenBot här {add_emoji("police")}. Jag är en bot som hittar borttappade t:n i `det`. '
+            f"Har du möjligtvis glömt dessa: {ts}? "
         )
-    if df_post["nr_mistakes"][0] >= 3:
+    elif df_post["n_mis"][0] <= 2:
+        message = (
+            f'Tjenixen, SpråkpolisenBot här {add_emoji("police")}. Jag är en bot som ' f"skiljer på `de` och `dem`. "
+        )
+    elif df_post["n_mis"][0] >= 3:
         message = (
             f'Stopp {add_emoji("car")}{add_emoji("siren")}! '
             f'Du har blivit gripen av SpråkpolisenBot {add_emoji("police")} '
@@ -123,16 +126,24 @@ def create_header(df_post):
 
 
 def create_guide(df_post):
-    guide_message = (
-        f"En guide med tips för att skilja på `de` och `dem` finnes "
-        f"på [Språkpolisens hemsida](https://lauler.github.io/sprakpolisen/guide.html). "
-        # f"En interaktiv demo där användare själva kan skriva in meningar och få dem "
-        # f"rättade [finns här](https://lauler.github.io/sprakpolisen/demo.html)."
-    )
+
+    if df_post["n_mis_det"][0] >= 2:
+        guide_message = (
+            f"Ett skippat **t** sparar dig kanske någon tiondels sekund, men kostar samtidigt "
+            f"minst lika mycket tid för varje enskild läsare av dina kommentarer. Respektera dina "
+            f"medredditörer: lås fast dina t:n i de**t**!"
+        )
+    else:
+        guide_message = (
+            f"En guide med tips för att skilja på `de` och `dem` finnes "
+            f"på [Språkpolisens hemsida](https://lauler.github.io/sprakpolisen/guide.html). "
+            # f"En interaktiv demo där användare själva kan skriva in meningar och få dem "
+            # f"rättade [finns här](https://lauler.github.io/sprakpolisen/demo.html)."
+        )
 
     message = ""
 
-    if df_post["nr_mistakes_dem"][0] >= 2:
+    if df_post["n_mis_dem"][0] >= 2:
         added_message = (
             f"Visste du att `de` är cirka 10 gånger vanligare än `dem` i svensk text? "
             f"Om du är osäker kring vilket som är rätt är det alltså statistiskt sett säkrast "
@@ -140,9 +151,7 @@ def create_guide(df_post):
         )
         message += add_paragraph(added_message)
 
-    if df_post["sentences"].apply(
-        lambda sens: any([bool(re.search("[Dd]em flesta", sen)) for sen in sens])
-    )[0]:
+    if df_post["sentences"].apply(lambda sens: any([bool(re.search("[Dd]em flesta", sen)) for sen in sens]))[0]:
         added_message = (
             f"Visste du att det aldrig kan heta ~~dem flesta~~ på svenska? **De flesta** "
             f"är den enda korrekta formen av uttrycket."
@@ -150,9 +159,7 @@ def create_guide(df_post):
         message += add_paragraph(added_message)
 
     for word in ["andra", "värsta", "bästa", "sämsta", "första"]:
-        if df_post["sentences"].apply(
-            lambda sens: any([bool(re.search(f"[Dd]em {word}", sen)) for sen in sens])
-        )[0]:
+        if df_post["sentences"].apply(lambda sens: any([bool(re.search(f"[Dd]em {word}", sen)) for sen in sens]))[0]:
             added_message = (
                 f"Visste du att det inte kan heta ~~dem {word}~~? **De {word}** "
                 f"är den korrekta formen. När `de` används i en betydelse "
@@ -178,9 +185,7 @@ def create_guide_en(df_post):
 
     message = ""
 
-    if df_post["sentences"].apply(
-        lambda sens: any([bool(re.search("[Dd]em flesta", sen)) for sen in sens])
-    )[0]:
+    if df_post["sentences"].apply(lambda sens: any([bool(re.search("[Dd]em flesta", sen)) for sen in sens]))[0]:
         added_message = (
             f"Visste du att det aldrig kan heta ~~dem flesta~~ på svenska? **De flesta** "
             f"är den enda korrekta formen av uttrycket."
@@ -188,9 +193,7 @@ def create_guide_en(df_post):
         message += add_paragraph(added_message)
 
     for word in ["andra", "värsta", "bästa", "sämsta", "första"]:
-        if df_post["sentences"].apply(
-            lambda sens: any([bool(re.search(f"[Dd]em {word}", sen)) for sen in sens])
-        )[0]:
+        if df_post["sentences"].apply(lambda sens: any([bool(re.search(f"[Dd]em {word}", sen)) for sen in sens]))[0]:
             added_message = (
                 f"Visste du att det inte kan heta ~~dem {word}~~? **De {word}** "
                 f"är den korrekta formen. När `de` används i en betydelse "

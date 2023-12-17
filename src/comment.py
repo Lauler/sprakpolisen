@@ -41,11 +41,11 @@ def choose_post(df_all, min_hour, max_hour):
         logger.exception("No suitable comment reply candidates. Exiting.")
         raise e
 
-    if any(df_all["nr_mistakes"] > 1):
-        df_multimistake = df_all[df_all["nr_mistakes"] > 1].reset_index(drop=True)
+    if any(df_all["n_mis"] > 1):
+        df_multimistake = df_all[df_all["n_mis"] > 1].reset_index(drop=True)
 
         if len(df_multimistake) > 1:
-            max_mistake_idx = df_multimistake["nr_mistakes"].idxmax()
+            max_mistake_idx = df_multimistake["n_mis"].idxmax()
             df_post = df_multimistake.iloc[max_mistake_idx : (max_mistake_idx + 1), :]
         else:
             df_post = df_multimistake
@@ -81,7 +81,6 @@ def correct_sentence(preds, sentences):
     offset = 0
     correct_sens = []
     for pred, sentence in zip(preds, sentences):
-
         if len(pred) == 0:
             continue
 
@@ -108,7 +107,7 @@ def correct_sentence(preds, sentences):
 
 def correct_sentence_en(preds, correct_sens):
     """
-    We have correctly translated sentences already, but want to 
+    We have correctly translated sentences already, but want to
     introduce the wrong form of they/them with a strikethrough
     next to the already corrected instance of they/them/the/those.
     """
@@ -131,14 +130,12 @@ def correct_sentence_en(preds, correct_sens):
     them_words = ["Them", "them"]
 
     for i, (pred, sentence) in enumerate(zip(preds_en, correct_sens)):
-
         target_indices = []  # To check if we're trying to correct same word twice or more
         contains_pred_mismatch = False  # Check if 'de' maps to they_words, and 'dem' to them_words
         if len(pred) == 0:
             continue
 
         for j, entity in enumerate(pred):
-
             target_indices.append(entity["index"])
             if entity["word"] not in (they_words + them_words):
                 logger.info(
@@ -211,4 +208,3 @@ def create_reply_msg(df_post, pipes):
         message += create_guide(df_post)
 
     return message
-

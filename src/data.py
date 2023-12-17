@@ -1,11 +1,10 @@
+import glob
 import os
-import time
 import datetime as dt
 import re
 import pandas as pd
 import logging
 from nltk.tokenize import sent_tokenize
-from .utils import join_insertion
 from .markdown import remove_emoji
 
 
@@ -80,13 +79,29 @@ KEEP_SUBMISSION_COLUMNS = [
 ]
 
 
+def filter_dedem_comments(df):
+    """
+    Keep only comments with de/dem.
+    """
+    dedem_pattern = "(?<!\w)[Dd][Ee][Mm]?(?![\w\*])"
+    df = df[df["body"].str.contains(dedem_pattern)].reset_index(drop=True)
+    return df
+
+
 def filter_dedem_sentences(sentences):
     """
     Keep only sentences with de/dem.
     """
 
-    dedem_pattern = "(?<!\w)[Dd][Ee][Mm]?(?!\w)"
+    dedem_pattern = "(?<!\w)[Dd][Ee][Mm]?(?![\w\*])"
     dedem_sentences = filter(lambda sentence: bool(re.search(dedem_pattern, sentence)), sentences)
+
+    # Don't match the string 'de och dem', as this indicatse people discussing the grammar of de vs dem.
+    dedem_sentences = filter(lambda sentence: "De och dem" not in sentence, dedem_sentences)
+    dedem_sentences = filter(lambda sentence: "de och dem" not in sentence, dedem_sentences)
+
+    # Don't match single word sentences
+    dedem_sentences = filter(lambda sentence: len(sentence.split()) > 1, dedem_sentences)
 
     return list(dedem_sentences)
 
@@ -100,13 +115,22 @@ def predict_dedem(comment, pipe):
 
     de_pattern = "(?<!\w)[D][Ee](?!\w)"
     dem_pattern = "(?<!\w)[D][Ee][Mm](?!\w)"
+    det_pattern = "(?<!\w)[D][Ee][Tt](?!\w)"
+    enda_pattern = "(?<!\w)[Ee][Nn][Dd][Aa](?!\w)"
+    anda_pattern = "(?<!\w)[Ää][Nn][Dd][Aa](?!\w)"
     comment = [re.sub(de_pattern, "de", sentence) for sentence in comment]
     comment = [re.sub(dem_pattern, "dem", sentence) for sentence in comment]
+    comment = [re.sub(det_pattern, "det", sentence) for sentence in comment]
+    comment = [re.sub(enda_pattern, "enda", sentence) for sentence in comment]
+    comment = [re.sub(anda_pattern, "ända", sentence) for sentence in comment]
     preds = [pipe(sentence) for sentence in comment]
 
     pred_list = []
     for pred in preds:
-        pred_list.append([d for d in pred if (d["entity"] != "ord") and (d["entity"].lower() != d["word"])])
+        # Keep only predictions where model has predicted differently from the text that was present in the comment.
+        pred_list.append(
+            [d for d in pred if (d["entity"] != "ord") and (d["entity"].lower() != d["word"])]
+        )
 
     return pred_list
 
@@ -125,12 +149,8 @@ def filter_prediction(preds, threshold=0.9):
     return keep_preds
 
 
-def start_time(weeks=0, days=0, hours=2, minutes=10):
-    """
-    How many days, hours and minutes back to query reddit for comments.
-    """
-    start_time = dt.datetime.now() - dt.timedelta(weeks=weeks, days=days, hours=hours, minutes=minutes)
-    return int(start_time.timestamp())
+def date_to_epoch(year, month, day, hour=0, minute=0, second=0):
+    return int(dt.datetime(year, month, day, hour, minute, second).timestamp())
 
 
 def filter_de_som(sentences, preds):
@@ -162,17 +182,31 @@ def filter_dom(sentences, preds):
     return preds
 
 
-def download_comments(api, weeks=0, days=0, hours=2, minutes=10):
+def download_submission(submission):
     logger.info(
-        f"Downloading all comments from /r/swdeden from the last {weeks} weeks, {days} days, {hours} hours and {minutes} minutes."
+        f"Downloading {submission.title} at {submission.permalink} with {submission.num_comments} comments."
     )
-    # Download comments this far back in time.
-    after_time = start_time(weeks=weeks, days=days, hours=hours, minutes=minutes)
-    gen = api.search_comments(after=after_time, q="de|dem", subreddit="sweden")
+    submission.num_duplicates  # This is a hack to force the API to fetch this attribute
+    submission_data = submission.__dict__
+
+    df_sub = pd.DataFrame([submission_data])
+    df_sub = df_sub[KEEP_SUBMISSION_COLUMNS]
+    df_sub = df_sub.add_suffix("_sub")
+    df_sub["author_sub"] = df_sub["author_sub"].apply(lambda x: x.name if x is not None else None)
+
+    return df_sub
+
+
+def download_comments(submission):
+    comments = submission.comments.list()
 
     # Get comments
-    df = pd.DataFrame([thing.__dict__ for thing in gen])
+    df = pd.DataFrame([thing.__dict__ for thing in comments])
     df = df[KEEP_COMMENT_COLUMNS]
+    df["id_sub"] = submission.id
+
+    # Filter out rows with NaN in body
+    df = df[df["body"].notna()].reset_index(drop=True)
 
     return df
 
@@ -191,12 +225,16 @@ def preprocess_comments(df):
 
     # Keep only sentences with de/dem
     df["sentences"] = df["sentences"].apply(lambda sen: filter_dedem_sentences(sen))
-    df = df[df["sentences"].apply(lambda x: any([len(y) != 0 for y in x])) > 0].reset_index(drop=True)
+    df = df[df["sentences"].apply(lambda x: any([len(y) != 0 for y in x])) > 0].reset_index(
+        drop=True
+    )
 
     # Split sentences also on new paragraphs "\n\n" (in case someone doesn't use punctuation)
     df["sentences"] = df["sentences"].apply(lambda sens: [sen.splitlines() for sen in sens])
     # Flatten list of lists and remove empty sentences consisting of only ''.
-    df["sentences"] = df["sentences"].apply(lambda sens: [sen for split_sens in sens for sen in split_sens])
+    df["sentences"] = df["sentences"].apply(
+        lambda sens: [sen for split_sens in sens for sen in split_sens]
+    )
     df["sentences"] = [[sen for sen in sens if len(sen) > 0] for sens in df["sentences"]]
 
     # Remove emojis
@@ -206,7 +244,9 @@ def preprocess_comments(df):
     df["sentences"] = df["sentences"].apply(lambda sens: [sen.strip() for sen in sens])
 
     # Remove 2 or more spaces in a row and replace by single space.
-    df["sentences"] = df["sentences"].apply(lambda sens: [re.sub(" {2,}", " ", sen) for sen in sens])
+    df["sentences"] = df["sentences"].apply(
+        lambda sens: [re.sub(" {2,}", " ", sen) for sen in sens]
+    )
 
     logger.info("Finished preprocessing.")
 
@@ -230,11 +270,27 @@ def predict_comments(df, pipe, threshold=0.98):
     return df
 
 
-def count_incorrect(preds, word):
-
+def count_incorrect_word(preds, word):
+    """
+    Only use for "det".
+    """
     count = 0
     for pred in preds:
+        for entity in pred:
+            if len(pred) == 0:
+                break
 
+            count += 1 if (entity["word"].lower() == word and entity["entity"] != "DET") else 0
+
+    return count
+
+
+def count_all_word(preds, word):
+    """
+    Count all occurrences of a word in the original comment (entity["word"] is the original word).
+    """
+    count = 0
+    for pred in preds:
         for entity in pred:
             if len(pred) == 0:
                 break
@@ -244,18 +300,46 @@ def count_incorrect(preds, word):
     return count
 
 
+def count_incorrect_entity(preds, word):
+    count = 0
+    for pred in preds:
+        for entity in pred:
+            if len(pred) == 0:
+                break
+
+            count += 1 if entity["entity"].lower() == word else 0
+
+    return count
+
+
 def filter_comments(df):
     logger.info("Filtering comments...")
     # Remove rows with only empty predictions (i.e. sentence preds under the threshold)
-    df_comment = df[df["pred"].apply(lambda x: any([len(y) != 0 for y in x])) > 0].reset_index(drop=True)
+    df_comment = df[df["pred"].apply(lambda x: any([len(y) != 0 for y in x])) > 0].reset_index(
+        drop=True
+    )
 
     # Create extra variables
-    df_comment["nr_mistakes"] = df_comment["pred"].apply(lambda x: sum([len(y) for y in x]))
-    df_comment["nr_mistakes_de"] = df_comment["pred"].apply(lambda x: count_incorrect(x, word="de"))
-    df_comment["nr_mistakes_dem"] = df_comment["pred"].apply(lambda x: count_incorrect(x, word="dem"))
+    df_comment["n_mis"] = df_comment["pred"].apply(lambda x: sum([len(y) for y in x]))
+    df_comment["n_mis_de"] = df_comment["pred"].apply(lambda x: count_incorrect_word(x, word="de"))
+    df_comment["n_mis_dem"] = df_comment["pred"].apply(
+        lambda x: count_incorrect_word(x, word="dem")
+    )
+    df_comment["n_mis_det"] = df_comment["pred"].apply(
+        lambda x: count_incorrect_entity(x, word="det")
+    )
+    df_comment["n_mis_enda"] = df_comment["pred"].apply(
+        lambda x: count_incorrect_word(x, word="enda")
+    )
+    df_comment["n_mis_ända"] = df_comment["pred"].apply(
+        lambda x: count_incorrect_word(x, word="ända")
+    )
+
     df_comment["author"] = df_comment["author"].apply(lambda x: x.name if x is not None else None)
     df_comment = df_comment[df_comment["author"] != "SprakpolisenBot"]  # Filter out bot's comments
-    df_comment["subreddit"] = df_comment["subreddit"].apply(lambda x: x.display_name if x is not None else None)
+    df_comment["subreddit"] = df_comment["subreddit"].apply(
+        lambda x: x.display_name if x is not None else None
+    )
 
     if len(df_comment) > 0:
         df_comment["time_downloaded"] = int(dt.datetime.now().timestamp())
@@ -281,35 +365,6 @@ def save_feather(df, type, date):
 
     df = df.reset_index(drop=True)
     df.to_feather(f"data/{type}/{date}_{type}.feather")
-
-
-def download_submission(link_ids, reddit_api, backoff_factor=0.4):
-
-    link_ids = list(set(link_ids))
-    df_list = []
-    for link_id in link_ids:
-        for i in range(5):
-            # Exponential backoff
-            backoff_time = backoff_factor * (2**i)
-
-            try:
-                submission = reddit_api.submission(id=link_id)
-                logger.info(f"Downloading {submission.title} at {submission.permalink}")
-                submission_data = vars(submission)
-                submission_cols = {key: submission_data[key] for key in KEEP_SUBMISSION_COLUMNS}
-                df_list.append(submission_cols)
-                break
-
-            except:
-                logger.error(f"Download of {link_id} failed. Retry {i}.")
-
-            time.sleep(backoff_time)
-
-    df_sub = pd.DataFrame(df_list)
-    df_sub = df_sub.add_suffix("_sub")
-    df_sub["author_sub"] = df_sub["author_sub"].apply(lambda x: x.name if x is not None else None)
-
-    return df_sub
 
 
 def merge_comment_submission(df_comment, df_sub):
@@ -338,6 +393,18 @@ def merge_comment_submission(df_comment, df_sub):
     df_all["edited"] = df_all["edited"].astype("int64")  # Sometimes int, sometimes boolean in API
 
     return df_all
+
+
+def get_previous_submissions(folder="data/submission"):
+    list_of_files = glob.glob(f"{folder}/*")
+
+    # If empty folder, return empty dataframe
+    if len(list_of_files) == 0:
+        return pd.DataFrame()
+
+    latest_file = max(list_of_files, key=os.path.getctime)
+    df_sub = pd.read_feather(latest_file)
+    return df_sub
 
 
 def get_posted_comments(folder="data/posted"):
@@ -374,7 +441,9 @@ def aggregate_posted_comments(folder="data/posted"):
     posted_files = [re.match(r"(.*)_posted\.feather", file).group(1) for file in posted_files]
     posted_files = [re.sub("_", " ", file) for file in posted_files]
 
-    posted_files = [re.sub(r"(\d{4}-\d{2}-\d{2}\s\d{2})-(\d{2})", r"\1:\2", file) for file in posted_files]
+    posted_files = [
+        re.sub(r"(\d{4}-\d{2}-\d{2}\s\d{2})-(\d{2})", r"\1:\2", file) for file in posted_files
+    ]
 
     df["replied_time"] = posted_files
     df["replied_time"] = pd.to_datetime(df["replied_time"])
@@ -391,3 +460,21 @@ def aggregate_posted_comments(folder="data/posted"):
     df.to_feather(os.path.join(dest_dir, "df_posted.feather"))
 
     return df
+
+
+def analyze_comments(submission, pipe):
+    """
+    Run all filters and predictions on the comments of a submission.
+    """
+
+    df_comment = download_comments(submission)
+    # Regex and sentence splitting
+    df_comment = preprocess_comments(df_comment)
+    # Keep only comments with de/dem
+    df_comment = filter_dedem_comments(df_comment)
+    # Only saves preds above threshold
+    df_comment = predict_comments(df_comment, pipe, threshold=0.985)
+    # Keep only comments with incorrect usage of de/dem/det
+    df_comment = filter_comments(df_comment)
+
+    return df_comment
