@@ -13,11 +13,11 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ```
 
-Idén för SpråkpolisenBot kom till efter att ha märkt hur ivriga användare på Sweddit generellt var att korrigera andra användares språkbruk. De vanligast utpekade felen handlade alltid om förväxlingar av **`de`** och **`dem`**, tätt följt av särskrivningar. Även om kommentarer innehållandes rättelser generellt uppröstades friskt, var de inte alltid särskilt konstruktiva upplevelser för den felande användaren, eftersom fokus till större delen lades på att påpeka fel snarare än försöka avhjälpa källan till felen.
+Idén för SpråkpolisenBot kom till efter att ha märkt hur ivriga användare på Sweddit generellt var att korrigera andra användares språkbruk. De vanligast rättelserna handlade om förväxlingar av **`de`** och **`dem`**, tätt följt av särskrivningar. Även om kommentarer innehållande rättelser generellt uppröstades av andra användare, var de inte alltid särskilt konstruktiva upplevelser för den felande användaren. Fokus låg mestadels på att påpeka fel snarare än försöka avhjälpa källan till felen.
 
-SpråkpolisenBot har därför beslutat att släppa lös en AI-modell på /r/sweden. Modellens syfte är fortfarande att rätta förväxlingar av **`de`** och **`dem`**, men med en ytterligare ambition att ge användaren feedback på hur man kan tänka för att göra rätt. Detta sker främst genom att
+SpråkpolisenBot är en AI-modell som försöker råda bot på detta. Modellens syfte är förvisso fortfarande att rätta förväxlingar av **`de`** och **`dem`**, men med en ytterligare ambition att ge användare feedback på hur man kan tänka för att göra rätt. Detta sker främst genom att
 
-1. i varje kommentar visa hur användaren kan tillämpa en praktisk minnesregel, genom att använda denna på användarens felande mening.
+1. i varje kommentar visa hur användaren kan tillämpa en praktisk minnesregel, genom att låta AI:n tillämpa denna minnesregel på användarens felande mening.
 1. i varje kommentar länka till en [guide](https://lauler.github.io/sprakpolisen/guide.html) med praktiska tips.
 2. låta användaren få tillgång till AI-modellen i form av en [interaktiv demo](https://lauler.github.io/sprakpolisen/demo.html).
 

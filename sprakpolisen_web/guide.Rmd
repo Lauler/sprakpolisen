@@ -29,18 +29,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 I modernt svenskt talspråk uttalas både **`de`** och **`dem`** nästan uteslutande som **`\dåmm\`**. Skriftspråket skiljer dock fortfarande på formerna. Nedan listar SpråkpolisenBot ett par kortfattade tips kring hur du snabbt kan gå från *osäker* till *fortfarande-något-osäker* men i de allra flesta fall korrekt användning av **`de`** och **`dem`**. 
 
-## 1. Om du är osäker, gissa alltid på '`de`' {#sec1}
+## 1. Om du är osäker, gissa '`de`' {#sec1}
 
-**`De`** är cirka tio gånger vanligare i svenskt skriftspråk jämfört med **`dem`**. Om du är någon som genomgående och konsekvent (över)använder **`dem`** bör du vara väldigt medveten om att 
+**`De`** är cirka tio gånger vanligare än **`dem`** i svenskt skriftspråk. Om du genomgående och konsekvent (över)använder **`dem`** blir det ofta fel av ren automatik. De felaktiga användningarna blir också många och frekventa, då det rent statistiskt kommer att bli fel mer än $9$ av $10$ gånger om man genomgående använder **`dem`**. 
 
-1. Felaktig användning av **`dem`** är det som sticker mest i ögonen hos dem som kan skilja mellan **`de`** och **`dem`**. Att genomgående skriva **`dem`** är därmed att göra sig själv en stor otjänst.
-2. Felaktig använding av **`de`** uppfattas indirekt som mindre allvarligt. Eftersom **`de`** förekommer i såpass större utsträckning är sannolikheten högre att du gör rätt av ren slump. I de fall där du ändå råkat göra fel uppfattas det dessutom som mindre allvarligt och ses som ett enstaka misstag.
+Felaktig användning av **`de`** kan också uppfattas som mindre allvarligt. Vid genomgående användning av **`de`** är sannolikheten högre att man skriver rätt av ren slump. I de fall där man råkat skriva fel uppfattas det därför oftare som ett enstaka misstag. 
 
-Om du konsekvent använder **`de`** gör du endast fel cirka $10\%$ av de tillfällen du använder ordet. Är du istället någon som konsekvent använder **`dem`**, kommer det rent statistiskt bli fel mer än $9$ av $10$ gånger. Använd statistiken till din fördel: gissa **`de`**!
+Använd statistiken till din fördel: gissa **`de`**!
 
 ## 2. Översätt till engelska och se om 'them' passar {#sec2}
 
-I många fall kan vi använda vår språkliga intuition från både svenskan och engelskan till vår fördel. En ganska enkel strategi för att lista ut huruvida det ska vara **`de`** eller **`dem`**, är att översätta meningen -- eller några enstaka ord runtomkring -- till engelska. En kortfattad minnesregel som nästan alltid fungerar är:
+En ganska enkel strategi för att lista ut huruvida det ska vara **`de`** eller **`dem`**, är att översätta meningen -- eller några enstaka ord runtomkring -- till engelska. En kortfattad minnesregel som nästan alltid fungerar är:
 
 > Översätt meningen till engelska. Om **`them`** passar bäst ska det vara **`dem`** på svenska. Om **`they`** eller något annat (t.ex. **`the`**, **`those`** eller **`these`**) passar bättre kan **`de`** användas. 
 
@@ -50,8 +49,8 @@ Minnesregeln kan egentligen förkortas ytterligare till att endast lyda
 
 Exempel (håll musen över den grå rutan för facit):
 
-> Läraren trodde att [de ]{.spoiler} hade glömt läxorna.  
-> The teacher thought **`they`** had forgotten the homework. 
+> Läraren trodde att [de ]{.spoiler} hade glömt att göra läxorna.  
+> The teacher thought **`they`** had forgotten to do the homework. 
 
 **`They`** passar bäst, alltså ska det vara **`de`**.
 
@@ -62,12 +61,12 @@ Exempel (håll musen över den grå rutan för facit):
 
 Ett till exempel:
 
-> [De]{.spoiler} gick till restaurangen och [de]{.spoiler} åt allt [de]{.spoiler} såg omkring [dem]{.spoiler}.  
-> **`They`** went to the restaurant and **`they`** ate everything **`they`** saw around **`them`**.
+> [De]{.spoiler} gick till biblioteket, och bibliotekarien sade åt [dem]{.spoiler} att vara tysta.  
+> **`They`** went to the library, and the librarian told **`them`** to be quiet.
 
-De tre första användningarna ska vara **`de`** eftersom de översattes till **`they`**, medan den sista ska vara **`dem`**. 
+Den första rutan ska vara **`de`**, medan den sista ska vara **`dem`**. 
 
-Det finns även fall där översättningen kan bli **`the`**, **`those`**, eller **`these`**. I samtliga dessa fall går det att använda **`de`** på svenska.
+Det finns även fall där översättningen kan bli **`the`**, **`those`**, eller **`these`**. I samtliga dessa fall går det (nästan alltid) att använda **`de`** på svenska.
 
 > Jag såg [de ]{.spoiler} andra eleverna fuska.  
 > I saw **`the`** other students cheat.
@@ -76,14 +75,14 @@ Det finns även fall där översättningen kan bli **`the`**, **`those`**, eller
 > **`These`** players haven't practiced for a week. 
 
 > Vi gick förbi [de ]{.spoiler} där träden för en timma sedan.  
-> We walked past **`those`** trees one hour ago.
+> We walked past **`those`** trees an hour ago.
 
 > Hon behandlade [de]{.spoiler} patienter som insjuknade med antibiotika.  
 > She treated **`the`** patients who fell ill with antibiotics. 
 
 ## 3. Ersätt med 'oss' och se om det passar
 
-En annan liknande strategi för den som hellre vill använder sig av svenskan, är att ersätta varje **`de`** och **`dem`** med ett **`oss`**, och se om det passar in i meningen. Ibland rekommenderas att testa att ersätta med både **`vi`** och **`oss`**, men det räcker faktiskt att endast testa om **`oss`** passar. En minnesregel som kan tillämpas här lyder:
+En annan liknande strategi för den som hellre vill använda sig av svenskan, är att ersätta varje **`de`** och **`dem`** med ett **`oss`**, och se om det passar in i meningen. Ibland rekommenderas att testa att ersätta med både **`vi`** och **`oss`**, men det räcker att endast testa om **`oss`** passar. En minnesregel som kan tillämpas här lyder:
 
 > Ersätt **`de`** och **`dem`** med ett **`oss`**. Om ordet **`oss`** passar in i meningen ska det vara **`dem`**. I övriga fall kan **`de`** användas. 
 
@@ -101,8 +100,8 @@ Exempel:
 
 Låt oss testa även de andra exemplen:
 
-> [De]{.spoiler} gick till restaurangen och [de]{.spoiler} åt allt [de]{.spoiler} såg omkring [dem]{.spoiler}.  
-> ~~**`Oss`**~~ gick till restaurangen och ~~**`oss`**~~ åt allt ~~**`oss`**~~ såg omkring **`oss`**.
+> [De]{.spoiler} gick till biblioteket, och bibliotekarien sade åt [dem]{.spoiler} att vara tysta.  
+> ~~**`Oss`**~~ gick till biblioteket, och bibliotekarien sade åt **`oss`** att vara tysta
 
 > Jag såg [de ]{.spoiler} andra eleverna fuska.  
 > Jag såg ~~**`oss`**~~ andra eleverna fuska.
@@ -116,9 +115,9 @@ Låt oss testa även de andra exemplen:
 > Hon behandlade [de]{.spoiler} patienter som insjuknade med antibiotika.  
 > Hon behandlade **`oss`** (?) patienter som insjuknade med antibiotika. 
 
-I de flesta fall är det tydligt vilka **`oss`** som inte passar in. Men det är inte i samtliga fall lika solklart vad som passar bäst jämfört med metoden där vi översatte till engelska. Meningen "Hon behandlade oss patienter som insjuknade med antibiotika" ser tillräckligt bra ut för att kunna hävda att **`oss`** passar, trots att det ska vara **`de`**. Jag rekommenderar därför att i första hand använda metoden som går via engelskan, då denna inte leder till tvetydigheter lika ofta.
+I de flesta fall är det tydligt vilka **`oss`** som inte passar in. Men det är inte i samtliga fall lika solklart vad som passar bäst jämfört med metoden där vi översatte till engelska. Meningen "Hon behandlade oss patienter som insjuknade med antibiotika" ser tillräckligt bra ut för att kunna hävda att **`oss`** passar, trots att det ska vara **`de`**. SpråkpolisenBot rekommenderar därför att i första hand använda metoden som går via engelskan för att bygga upp språkkänslan, då denna inte lika ofta leder till tvetydigheter.
 
-Vi är inte låsta till att endast ersätta med **`vi`** eller **`oss`** vid användning ovanstående tips. Nedan listas, i varsin kolumn, några olika sätt som **`de`** respektive **`dem`**  kan ersättas med alternativa personliga pronomen från både svenskan och engelskan:
+Vi är inte låsta till att endast ersätta med **`vi`** eller **`oss`** vid användning av ovanstående tips. Nedan listas, i varsin kolumn, några olika sätt som **`de`** respektive **`dem`**  kan ersättas med alternativa personliga pronomen från både svenskan och engelskan:
 
 ```{r, echo=FALSE}
 df = data.frame("Subjektsform" = c("de", "jag", "du", "han", "hon", "vi", "ni", "they"),
